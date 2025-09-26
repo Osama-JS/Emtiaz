@@ -1,0 +1,311 @@
+@model Emtias.Models.Scaffolded.Catgory
+
+@{
+    ViewData["Title"] = "تفاصيل القسم";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>تفاصيل القسم</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">الأقسام</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row">
+        <!-- Category Information Card -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">معلومات القسم</h5>
+                        <div class="text-muted">
+                            <small>رقم القسم: #@Model.Id</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Icon Display -->
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="category-icon-display">
+                                @if (!string.IsNullOrEmpty(Model.IconLink))
+                                {
+                                    <img src="@Model.IconLink" alt="@Model.Name" class="img-fluid rounded-3 shadow-sm" style="max-width: 150px; max-height: 150px; object-fit: cover;" onerror="showDefaultIcon(this)">
+                                }
+                                else
+                                {
+                                    <div class="default-icon-display d-flex align-items-center justify-content-center rounded-3 shadow-sm" style="width: 150px; height: 150px; background-color: #f8f9fa; border: 2px dashed #dee2e6; margin: 0 auto;">
+                                        <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                                    </div>
+                                }
+                                <p class="text-muted mt-2 small">أيقونة القسم</p>
+                            </div>
+                        </div>
+
+                        <!-- Category Details -->
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label text-muted">الاسم العربي</label>
+                                    <div class="  rounded p-3">
+                                        <h4 class="mb-0">@Model.Name</h4>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label text-muted">الاسم الإنجليزي</label>
+                                    <div class="  rounded p-3">
+                                        <h5 class="mb-0">@Model.EnName</h5>
+                                    </div>
+                                </div>
+
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics and Actions Card -->
+        <div class="col-lg-4">
+            <!-- Statistics Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">إحصائيات القسم</h5>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stats-icon bg-primary bg-gradient rounded-circle p-3 me-3">
+                            <i class="bi bi-shop text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">@Model.Restaurants.Count</h3>
+                            <small class="text-muted">مطعم مسجل</small>
+                        </div>
+                    </div>
+
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: @(Model.Restaurants.Count > 0 ? Math.Min(100, Model.Restaurants.Count * 10) : 5)%"></div>
+                    </div>
+
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h6 class="mb-0">نشط</h6>
+                                <small class="text-success">@Model.Restaurants.Count</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="mb-0">معطل</h6>
+                            <small class="text-muted">0</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">الإجراءات</h5>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="bi bi-pencil me-2"></i>
+                            تعديل القسم
+                        </a>
+
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-2"></i>
+                            حذف القسم
+                        </a>
+
+                        <hr>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restaurants in this Category -->
+    @if (Model.Restaurants.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title">المطاعم في هذا القسم</h5>
+                            <span class="badge bg-primary">@Model.Restaurants.Count مطعم</span>
+                        </div>
+
+                        <div class="row">
+                            @foreach (var restaurant in Model.Restaurants.Take(6))
+                            {
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <div class="card h-100 shadow-sm restaurant-card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start">
+                                                <div class="restaurant-icon me-3">
+                                                    @if (!string.IsNullOrEmpty(restaurant.IconLink))
+                                                    {
+                                                        <img src="@restaurant.IconLink" alt="@restaurant.Name" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                            <i class="bi bi-shop text-muted"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1">@restaurant.Name</h6>
+                                                    <p class="card-text text-muted small mb-1">@restaurant.EnName</p>
+                                                    @if (!string.IsNullOrEmpty(restaurant.Address))
+                                                    {
+                                                        <p class="card-text text-muted small mb-0">
+                                                            <i class="bi bi-geo-alt me-1"></i>@restaurant.Address
+                                                        </p>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (Model.Restaurants.Count > 6)
+                        {
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-outline-primary" onclick="showAllRestaurants()">
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض جميع المطاعم (@Model.Restaurants.Count)
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-shop text-muted" style="font-size: 4rem;"></i>
+                        <h5 class="text-muted mt-3">لا توجد مطاعم في هذا القسم</h5>
+                        <p class="text-muted">لم يتم تسجيل أي مطعم في هذا القسم بعد</p>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            إضافة مطعم جديد
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="default-icon-display d-flex align-items-center justify-content-center rounded-3 shadow-sm" style="width: 150px; height: 150px; background-color: #f8f9fa; border: 2px dashed #dee2e6; margin: 0 auto;">
+                    <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                </div>
+            `;
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i>';
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-success');
+
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-secondary');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            });
+        }
+
+        // Show all restaurants (placeholder function)
+        function showAllRestaurants() {
+            // This could redirect to a restaurants page filtered by category
+            // or show a modal with all restaurants
+            alert('سيتم توجيهك لصفحة المطاعم مفلترة حسب هذا القسم');
+            // window.location.href = '/Restaurants?categoryId=@Model.Id';
+        }
+
+        // Add hover effects to restaurant cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const restaurantCards = document.querySelectorAll('.restaurant-card');
+            restaurantCards.forEach(card => {
+                card.style.transition = 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out';
+
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.1)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '';
+                });
+            });
+
+            // Add click functionality to restaurant cards (optional)
+            restaurantCards.forEach(card => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function() {
+                    // This could redirect to restaurant details
+                    // const restaurantId = this.getAttribute('data-restaurant-id');
+                    // window.location.href = `/Restaurants/Details/${restaurantId}`;
+                });
+            });
+        });
+
+        // Animate statistics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const statsNumber = document.querySelector('.stats-icon').nextElementSibling.querySelector('h3');
+            const targetNumber = parseInt(statsNumber.textContent);
+            let currentNumber = 0;
+            const increment = Math.ceil(targetNumber / 20);
+
+            const timer = setInterval(() => {
+                currentNumber += increment;
+                if (currentNumber >= targetNumber) {
+                    currentNumber = targetNumber;
+                    clearInterval(timer);
+                }
+                statsNumber.textContent = currentNumber;
+            }, 50);
+        });
+    </script>
+}

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "8IKtC53tiIUpxApwuJkeQMUR8nFnGGY5IdrkweZTU6I=",
+  "Hash": "XMgsLOsgJUh86uZ0REW9QMWDbs8AD+uhJNLij5eX/3Q=",
   "Source": "Emtias",
   "BasePath": "_content/Emtias",
   "Mode": "Default",
@@ -11797,6 +11797,25 @@
       "OriginalItemSpec": "wwwroot\\images\\cade377c-9f38-43c6-a011-b481e85f03dc.png"
     },
     {
+      "Identity": "H:\\bassam\\Emtias\\wwwroot\\images\\categories\\README.md",
+      "SourceId": "Emtias",
+      "SourceType": "Discovered",
+      "ContentRoot": "H:\\bassam\\Emtias\\wwwroot\\",
+      "BasePath": "_content/Emtias",
+      "RelativePath": "images/categories/README.md",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\categories\\README.md"
+    },
+    {
       "Identity": "H:\\bassam\\Emtias\\wwwroot\\images\\ce1ca8cf-4a41-4149-affd-6bbf5a7c3bee.png",
       "SourceId": "Emtias",
       "SourceType": "Discovered",
@@ -11909,6 +11928,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\fef6be49-3e60-4091-aed2-19449bce1977.png"
+    },
+    {
+      "Identity": "H:\\bassam\\Emtias\\wwwroot\\images\\products\\README.md",
+      "SourceId": "Emtias",
+      "SourceType": "Discovered",
+      "ContentRoot": "H:\\bassam\\Emtias\\wwwroot\\",
+      "BasePath": "_content/Emtias",
+      "RelativePath": "images/products/README.md",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\products\\README.md"
     },
     {
       "Identity": "H:\\bassam\\Emtias\\wwwroot\\js\\jquery-1.10.2.min.js",

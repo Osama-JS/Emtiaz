@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Emtias")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bc7060936e61dfae0f07ceb8e07aae0f1746cf50")]
 [assembly: System.Reflection.AssemblyProductAttribute("Emtias")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Emtias")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

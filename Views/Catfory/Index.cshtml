@@ -1,0 +1,353 @@
+@model IEnumerable<Emtias.Models.Scaffolded.Catgory>
+
+@{
+    ViewData["Title"] = "إدارة الأقسام";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>إدارة الأقسام</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item active">الأقسام</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Error Message -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">قائمة الأقسام</h5>
+                        <a class="btn btn-primary" asp-action="Create">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            إضافة قسم جديد
+                        </a>
+                    </div>
+
+                    <!-- Search and Filter Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="search-form">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="searchInput" placeholder="ابحث بالاسم العربي أو الإنجليزي..." onkeyup="filterCategories()">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="sortSelect" onchange="sortCategories()">
+                                <option value="name-asc">الاسم العربي (أ-ي)</option>
+                                <option value="name-desc">الاسم العربي (ي-أ)</option>
+                                <option value="enname-asc">الاسم الإنجليزي (A-Z)</option>
+                                <option value="enname-desc">الاسم الإنجليزي (Z-A)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="viewMode" id="tableView" checked onchange="toggleView('table')">
+                                <label class="btn btn-outline-secondary" for="tableView">
+                                    <i class="bi bi-table"></i> جدول
+                                </label>
+                                <input type="radio" class="btn-check" name="viewMode" id="cardView" onchange="toggleView('card')">
+                                <label class="btn btn-outline-secondary" for="cardView">
+                                     <i class="bi bi-grid-3x3-gap"></i> كروت
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table View -->
+                    <div id="tableView-content" class="table-responsive">
+                        <table class="table table-hover" id="categoriesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;">الأيقونة</th>
+                                    <th>الاسم العربي</th>
+                                    <th>الاسم الإنجليزي</th>
+                                    <th>عدد المطاعم</th>
+                                    <th style="width: 150px;">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model) {
+                                    <tr data-name="@item.Name" data-enname="@item.EnName">
+                                        <td class="text-center">
+                                            @if (!string.IsNullOrEmpty(item.IconLink))
+                                            {
+                                                <img src="@item.IconLink" alt="@item.Name" class="category-icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
+                                            }
+                                            else
+                                            {
+                                                <div class="category-icon-placeholder d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                                                    <i class="bi bi-image text-muted"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <strong>@Html.DisplayFor(modelItem => item.Name)</strong>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">@Html.DisplayFor(modelItem => item.EnName)</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@item.Restaurants.Count مطعم</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="عرض التفاصيل">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="تعديل">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="حذف">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Card View -->
+                    <div id="cardView-content" class="row" style="display: none;">
+                        @foreach (var item in Model) {
+                            <div class="col-xl-3 col-lg-4 col-md-6 mb-4 category-card" data-name="@item.Name" data-enname="@item.EnName">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            @if (!string.IsNullOrEmpty(item.IconLink))
+                                            {
+                                                <img src="@item.IconLink" alt="@item.Name" class="category-icon-large" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;">
+                                            }
+                                            else
+                                            {
+                                                <div class="category-icon-placeholder-large d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px; background-color: #f8f9fa; border-radius: 12px; border: 2px dashed #dee2e6;">
+                                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <h5 class="card-title">@item.Name</h5>
+                                        <p class="card-text text-muted">@item.EnName</p>
+                                        <div class="mb-3">
+                                            <span class="badge bg-info">@item.Restaurants.Count مطعم</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-grid gap-2">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye me-1"></i>عرض
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil me-1"></i>تعديل
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash me-1"></i>حذف
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- No Results Message -->
+                    <div id="noResults" class="text-center py-5" style="display: none;">
+                        <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted mt-3">لا توجد نتائج</h5>
+                        <p class="text-muted">لم يتم العثور على أقسام تطابق البحث</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Global variables
+        let currentView = 'table';
+        let categories = [];
+
+        // Initialize categories data
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCategories();
+        });
+
+        function initializeCategories() {
+            categories = [];
+            const tableRows = document.querySelectorAll('#categoriesTable tbody tr');
+            const cardElements = document.querySelectorAll('.category-card');
+
+            tableRows.forEach((row, index) => {
+                const name = row.getAttribute('data-name') || '';
+                const enname = row.getAttribute('data-enname') || '';
+                categories.push({
+                    name: name,
+                    enname: enname,
+                    tableRow: row,
+                    cardElement: cardElements[index]
+                });
+            });
+        }
+
+        // Toggle between table and card view
+        function toggleView(viewType) {
+            currentView = viewType;
+            const tableView = document.getElementById('tableView-content');
+            const cardView = document.getElementById('cardView-content');
+
+            if (viewType === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'block';
+            }
+        }
+
+        // Filter categories based on search input
+        function filterCategories() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            categories.forEach(category => {
+                const nameMatch = category.name.toLowerCase().includes(searchTerm);
+                const ennameMatch = category.enname.toLowerCase().includes(searchTerm);
+                const isVisible = nameMatch || ennameMatch || searchTerm === '';
+
+                if (category.tableRow) {
+                    category.tableRow.style.display = isVisible ? '' : 'none';
+                }
+                if (category.cardElement) {
+                    category.cardElement.style.display = isVisible ? '' : 'none';
+                }
+
+                if (isVisible) visibleCount++;
+            });
+
+            // Show/hide no results message
+            const noResults = document.getElementById('noResults');
+            if (visibleCount === 0 && searchTerm !== '') {
+                noResults.style.display = 'block';
+                document.getElementById('tableView-content').style.display = 'none';
+                document.getElementById('cardView-content').style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                toggleView(currentView);
+            }
+        }
+
+        // Clear search input
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filterCategories();
+        }
+
+        // Sort categories
+        function sortCategories() {
+            const sortValue = document.getElementById('sortSelect').value;
+            const [field, direction] = sortValue.split('-');
+
+            categories.sort((a, b) => {
+                let aValue = field === 'name' ? a.name : a.enname;
+                let bValue = field === 'name' ? b.name : b.enname;
+
+                if (direction === 'asc') {
+                    return aValue.localeCompare(bValue);
+                } else {
+                    return bValue.localeCompare(aValue);
+                }
+            });
+
+            // Reorder table rows
+            const tableBody = document.querySelector('#categoriesTable tbody');
+            categories.forEach(category => {
+                if (category.tableRow) {
+                    tableBody.appendChild(category.tableRow);
+                }
+            });
+
+            // Reorder card elements
+            const cardContainer = document.getElementById('cardView-content');
+            categories.forEach(category => {
+                if (category.cardElement) {
+                    cardContainer.appendChild(category.cardElement);
+                }
+            });
+        }
+
+        // Add hover effects and animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth transitions to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.transition = 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out';
+
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '';
+                });
+            });
+
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('#categoriesTable tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        });
+
+        // Handle image loading errors
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.category-icon, .category-icon-large');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    const placeholder = this.nextElementSibling || this.parentElement.querySelector('.category-icon-placeholder, .category-icon-placeholder-large');
+                    if (placeholder) {
+                        placeholder.style.display = 'flex';
+                    }
+                });
+            });
+        });
+    </script>
+}

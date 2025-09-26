@@ -1,0 +1,527 @@
+@model IEnumerable<Emtias.Models.Scaffolded.Product>
+
+@{
+    ViewData["Title"] = "إدارة المنتجات";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>إدارة المنتجات</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item active">المنتجات</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Error Message -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">قائمة المنتجات</h5>
+                        <a class="btn btn-primary" asp-action="Create">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            إضافة منتج جديد
+                        </a>
+                    </div>
+
+                    <!-- Search and Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="search-form">
+                                <input type="text" class="form-control" id="searchInput" placeholder="البحث في المنتجات..." onkeyup="filterProducts()">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="restaurantFilter" onchange="filterProducts()">
+                                <option value="">جميع المطاعم</option>
+                                @foreach (var restaurant in Model.Where(p => p.Restaurant != null).Select(p => p.Restaurant).Distinct())
+                                {
+                                    <option value="@restaurant.Id">@restaurant.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="stateFilter" onchange="filterProducts()">
+                                <option value="">جميع الحالات</option>
+                                <option value="new">جديد</option>
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="viewMode" id="tableView" value="table" checked onchange="toggleView()">
+                                <label class="btn btn-outline-secondary" for="tableView">
+                                    <i class="bi bi-table"></i> جدول
+                                </label>
+                                <input type="radio" class="btn-check" name="viewMode" id="cardView" value="card" onchange="toggleView()">
+                                <label class="btn btn-outline-secondary" for="cardView">
+                                    <i class="bi bi-grid-3x3-gap"></i> كروت
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sorting Controls -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortProducts('name', 'asc')">
+                                    <i class="bi bi-sort-alpha-down"></i> الاسم تصاعدي
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortProducts('name', 'desc')">
+                                    <i class="bi bi-sort-alpha-up"></i> الاسم تنازلي
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortProducts('restaurant', 'asc')">
+                                    <i class="bi bi-sort-down"></i> المطعم
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortProducts('date', 'desc')">
+                                    <i class="bi bi-calendar-date"></i> الأحدث
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="text-muted">
+                                <span id="productCount">@Model.Count()</span> منتج
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Table View -->
+                    <div id="tableViewContainer" class="table-responsive">
+                        <table class="table table-hover align-middle" id="productsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الأيقونة</th>
+                                    <th>الاسم العربي</th>
+                                    <th>الاسم الإنجليزي</th>
+                                    <th>المطعم</th>
+                                    <th>الحالة</th>
+                                    <th>تاريخ الإنشاء</th>
+                                    <th>الحالة العامة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Model)
+                                {
+                                    <tr data-product-id="@product.Id" data-restaurant-id="@product.RestaurantId" data-name="@product.Name" data-en-name="@product.EnName" data-restaurant="@product.Restaurant?.Name" data-state="@product.State" data-create-date="@product.CreateAt?.ToString("yyyy-MM-dd")">
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(product.IconLink))
+                                            {
+                                                <img src="@product.IconLink" alt="@product.Name" class="product-icon rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" onerror="showDefaultProductIcon(this)">
+                                            }
+                                            else
+                                            {
+                                                <div class="product-icon-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef; border: 1px solid #dee2e6;">
+                                                    <i class="bi bi-box text-muted"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <strong>@product.Name</strong>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">@product.EnName</span>
+                                        </td>
+                                        <td>
+                                            @if (product.Restaurant != null)
+                                            {
+                                                <span class="badge bg-primary">@product.Restaurant.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">غير محدد</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @switch (product.State?.ToLower())
+                                            {
+                                                case "new":
+                                                    <span class="badge bg-info">جديد</span>
+                                                    break;
+                                                case "active":
+                                                    <span class="badge bg-success">نشط</span>
+                                                    break;
+                                                case "inactive":
+                                                    <span class="badge bg-warning">غير نشط</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">@product.State</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@product.CreateAt?.ToString("dd/MM/yyyy")</small>
+                                        </td>
+                                        <td>
+                                            @if (product.Deleted == true)
+                                            {
+                                                <span class="badge bg-danger">محذوف</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">نشط</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info" title="عرض التفاصيل">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning" title="تعديل">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger" title="حذف">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Card View -->
+                    <div id="cardViewContainer" class="row" style="display: none;">
+                        @foreach (var product in Model)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4 product-card" data-product-id="@product.Id" data-restaurant-id="@product.RestaurantId" data-name="@product.Name" data-en-name="@product.EnName" data-restaurant="@product.Restaurant?.Name" data-state="@product.State" data-create-date="@product.CreateAt?.ToString("yyyy-MM-dd")">
+                                <div class="card h-100 shadow-sm card-hover">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="me-3">
+                                                @if (!string.IsNullOrEmpty(product.IconLink))
+                                                {
+                                                    <img src="@product.IconLink" alt="@product.Name" class="product-icon-large rounded-3" style="width: 60px; height: 60px; object-fit: cover;" onerror="showDefaultProductIcon(this)">
+                                                }
+                                                else
+                                                {
+                                                    <div class="product-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: #e9ecef; border: 2px dashed #dee2e6;">
+                                                        <i class="bi bi-box text-muted" style="font-size: 1.5rem;"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="card-title mb-1">@product.Name</h6>
+                                                <p class="card-text text-muted small mb-2">@product.EnName</p>
+                                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                                    @if (product.Restaurant != null)
+                                                    {
+                                                        <span class="badge bg-primary small">@product.Restaurant.Name</span>
+                                                    }
+                                                    @switch (product.State?.ToLower())
+                                                    {
+                                                        case "new":
+                                                            <span class="badge bg-info small">جديد</span>
+                                                            break;
+                                                        case "active":
+                                                            <span class="badge bg-success small">نشط</span>
+                                                            break;
+                                                        case "inactive":
+                                                            <span class="badge bg-warning small">غير نشط</span>
+                                                            break;
+                                                        default:
+                                                            <span class="badge bg-secondary small">@product.State</span>
+                                                            break;
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div>
+                                                @if (product.Deleted == true)
+                                                {
+                                                    <span class="badge bg-danger">محذوف</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">نشط</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        @if (product.CreateAt.HasValue)
+                                        {
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    تم الإنشاء: @product.CreateAt.Value.ToString("dd/MM/yyyy")
+                                                </small>
+                                            </div>
+                                        }
+
+                                        <!-- Product Statistics -->
+                                        <div class="row text-center mb-3">
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <div class="text-primary">
+                                                        <i class="bi bi-percent"></i>
+                                                    </div>
+                                                    <small class="text-muted">@(product.Offers?.Count ?? 0) عرض</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <div class="text-success">
+                                                        <i class="bi bi-cart"></i>
+                                                    </div>
+                                                    <small class="text-muted">@(product.Carts?.Count ?? 0) سلة</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-warning">
+                                                    <i class="bi bi-bag"></i>
+                                                </div>
+                                                <small class="text-muted">@(product.OrderItems?.Count ?? 0) طلب</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="btn-group w-100" role="group">
+                                            <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-eye me-1"></i>عرض
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning">
+                                                <i class="bi bi-pencil me-1"></i>تعديل
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash me-1"></i>حذف
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <style>
+        .product-icon, .product-icon-large {
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .product-icon:hover, .product-icon-large:hover {
+            border-color: #0d6efd;
+            transform: scale(1.05);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem !important;
+            margin-left: 2px;
+        }
+
+        .alert {
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            border-left-color: #198754;
+        }
+
+        .alert-danger {
+            border-left-color: #dc3545;
+        }
+    </style>
+
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultProductIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="product-icon-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: ${img.style.width}; height: ${img.style.height}; background-color: #e9ecef; border: 1px solid #dee2e6;">
+                    <i class="bi bi-box text-muted"></i>
+                </div>
+            `;
+        }
+
+        // Toggle between table and card view
+        function toggleView() {
+            const tableView = document.getElementById('tableViewContainer');
+            const cardView = document.getElementById('cardViewContainer');
+            const selectedView = document.querySelector('input[name="viewMode"]:checked').value;
+
+            if (selectedView === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'flex';
+            }
+        }
+
+        // Filter products based on search, restaurant, and state
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const restaurantFilter = document.getElementById('restaurantFilter').value;
+            const stateFilter = document.getElementById('stateFilter').value;
+
+            // Filter table rows
+            const tableRows = document.querySelectorAll('#productsTable tbody tr');
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const name = row.dataset.name?.toLowerCase() || '';
+                const enName = row.dataset.enName?.toLowerCase() || '';
+                const restaurant = row.dataset.restaurant?.toLowerCase() || '';
+                const restaurantId = row.dataset.restaurantId || '';
+                const state = row.dataset.state?.toLowerCase() || '';
+
+                const matchesSearch = name.includes(searchTerm) || enName.includes(searchTerm) || restaurant.includes(searchTerm);
+                const matchesRestaurant = !restaurantFilter || restaurantId === restaurantFilter;
+                const matchesState = !stateFilter || state === stateFilter.toLowerCase();
+
+                if (matchesSearch && matchesRestaurant && matchesState) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Filter cards
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const name = card.dataset.name?.toLowerCase() || '';
+                const enName = card.dataset.enName?.toLowerCase() || '';
+                const restaurant = card.dataset.restaurant?.toLowerCase() || '';
+                const restaurantId = card.dataset.restaurantId || '';
+                const state = card.dataset.state?.toLowerCase() || '';
+
+                const matchesSearch = name.includes(searchTerm) || enName.includes(searchTerm) || restaurant.includes(searchTerm);
+                const matchesRestaurant = !restaurantFilter || restaurantId === restaurantFilter;
+                const matchesState = !stateFilter || state === stateFilter.toLowerCase();
+
+                if (matchesSearch && matchesRestaurant && matchesState) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update count
+            document.getElementById('productCount').textContent = visibleCount;
+        }
+
+        // Sort products
+        function sortProducts(sortBy, order) {
+            const tableBody = document.querySelector('#productsTable tbody');
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                let aValue, bValue;
+
+                switch (sortBy) {
+                    case 'name':
+                        aValue = a.dataset.name || '';
+                        bValue = b.dataset.name || '';
+                        break;
+                    case 'restaurant':
+                        aValue = a.dataset.restaurant || '';
+                        bValue = b.dataset.restaurant || '';
+                        break;
+                    case 'date':
+                        aValue = a.dataset.createDate || '';
+                        bValue = b.dataset.createDate || '';
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (order === 'asc') {
+                    return aValue.localeCompare(bValue, 'ar');
+                } else {
+                    return bValue.localeCompare(aValue, 'ar');
+                }
+            });
+
+            // Re-append sorted rows
+            rows.forEach(row => tableBody.appendChild(row));
+
+            // Sort cards too
+            const cardContainer = document.getElementById('cardViewContainer');
+            const cards = Array.from(cardContainer.querySelectorAll('.product-card'));
+
+            cards.sort((a, b) => {
+                let aValue, bValue;
+
+                switch (sortBy) {
+                    case 'name':
+                        aValue = a.dataset.name || '';
+                        bValue = b.dataset.name || '';
+                        break;
+                    case 'restaurant':
+                        aValue = a.dataset.restaurant || '';
+                        bValue = b.dataset.restaurant || '';
+                        break;
+                    case 'date':
+                        aValue = a.dataset.createDate || '';
+                        bValue = b.dataset.createDate || '';
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (order === 'asc') {
+                    return aValue.localeCompare(bValue, 'ar');
+                } else {
+                    return bValue.localeCompare(aValue, 'ar');
+                }
+            });
+
+            // Re-append sorted cards
+            cards.forEach(card => cardContainer.appendChild(card));
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+}

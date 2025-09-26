@@ -1,0 +1,278 @@
+@model Emtias.Models.Scaffolded.Offer
+
+@{
+    ViewData["Title"] = "إضافة عرض جديد";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>إضافة عرض جديد</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">العروض</a></li>
+            <li class="breadcrumb-item active">إضافة جديد</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">معلومات العرض الجديد</h5>
+
+                    <form asp-action="Create" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
+                        <!-- Model Errors Display -->
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>يرجى تصحيح الأخطاء التالية:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        }
+
+
+
+                        <!-- Offer Name -->
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label">اسم العرض <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="أدخل اسم العرض" required />
+                            <span asp-validation-for="Name" class="invalid-feedback"></span>
+                            <div class="form-text">اسم العرض كما سيظهر للعملاء</div>
+                        </div>
+
+                        <!-- Restaurant -->
+                        <div class="col-md-6">
+                            <label asp-for="RestaurantId" class="form-label">المطعم <span class="text-danger">*</span></label>
+                            <select asp-for="RestaurantId" class="form-select" asp-items="@((SelectList)ViewData["RestaurantId"])" required>
+                                <option value="">اختر المطعم</option>
+                            </select>
+                            <span asp-validation-for="RestaurantId" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Product -->
+                        <div class="col-md-6">
+                            <label asp-for="ProductId" class="form-label">المنتج</label>
+                            <select asp-for="ProductId" class="form-select" asp-items="@((SelectList)ViewData["ProductId"]!)">
+                                <option value="">اختر المنتج (اختياري)</option>
+                            </select>
+                            <span asp-validation-for="ProductId" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label">السعر <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" required />
+                                <span class="input-group-text">ر.س</span>
+                            </div>
+                            <span asp-validation-for="Price" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Delivery Cost -->
+                        <div class="col-md-6">
+                            <label asp-for="DeleverCost" class="form-label">تكلفة التوصيل</label>
+                            <div class="input-group">
+                                <input asp-for="DeleverCost" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                                <span class="input-group-text">ر.س</span>
+                            </div>
+                            <span asp-validation-for="DeleverCost" class="invalid-feedback"></span>
+                            <div class="form-text">تكلفة التوصيل (اختياري)</div>
+                        </div>
+
+                        <!-- Discount -->
+                        <div class="col-md-6">
+                            <label asp-for="Discount" class="form-label">نسبة الخصم</label>
+                            <div class="input-group">
+                                <input asp-for="Discount" class="form-control" type="number" min="0" max="100" placeholder="0" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <span asp-validation-for="Discount" class="invalid-feedback"></span>
+                            <div class="form-text">نسبة الخصم من 0 إلى 100%</div>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-md-6">
+                            <label asp-for="StartDate" class="form-label">تاريخ بداية العرض</label>
+                            <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="StartDate" class="invalid-feedback"></span>
+                            <div class="form-text">تاريخ ووقت بداية العرض</div>
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="col-md-6">
+                            <label asp-for="EndDate" class="form-label">تاريخ نهاية العرض</label>
+                            <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="EndDate" class="invalid-feedback"></span>
+                            <div class="form-text">تاريخ ووقت نهاية العرض</div>
+                        </div>
+
+                        <!-- State -->
+                        <div class="col-md-6">
+                            <label asp-for="State" class="form-label">حالة العرض</label>
+                            <select asp-for="State" class="form-select">
+                                <option value="">اختر الحالة</option>
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="expired">منتهي الصلاحية</option>
+                            </select>
+                            <span asp-validation-for="State" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Units -->
+                        <div class="col-md-6">
+                            <label asp-for="Units" class="form-label">عدد الوحدات</label>
+                            <input asp-for="Units" class="form-control" type="number" min="0" placeholder="0" />
+                            <span asp-validation-for="Units" class="invalid-feedback"></span>
+                            <div class="form-text">عدد الوحدات المتاحة للعرض</div>
+                        </div>
+
+
+
+                        <!-- Action Buttons -->
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة للقائمة
+                                </a>
+                                <div>
+                                    <button type="reset" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        إعادة تعيين
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        حفظ العرض
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <style>
+        .alert-danger {
+            border-left: 4px solid #dc3545;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-danger ul {
+            margin-bottom: 0;
+            padding-left: 1.5rem;
+        }
+
+        .alert-danger li {
+            margin-bottom: 0.25rem;
+        }
+
+        .invalid-feedback {
+            display: block;
+            font-size: 0.875rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+
+    <script>
+        // Reset entire form
+        function resetForm() {
+            document.querySelector('form').reset();
+
+            // Remove validation classes
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+        }
+
+        // Form validation
+        function validateOfferForm() {
+            const name = document.querySelector('input[name="Name"]').value.trim();
+            const restaurant = document.querySelector('select[name="RestaurantId"]').value;
+            const price = parseFloat(document.querySelector('input[name="Price"]').value);
+
+            if (!name) {
+                return false;
+            }
+
+            if (!restaurant) {
+                return false;
+            }
+
+            if (isNaN(price) || price <= 0) {
+                return false;
+            }
+
+            return true;
+        }
+
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!validateOfferForm()) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'يرجى تصحيح الأخطاء',
+                    text: 'يوجد أخطاء في النموذج. يرجى مراجعة الحقول المطلوبة وتصحيحها.',
+                    confirmButtonText: 'موافق'
+                });
+            }
+
+            this.classList.add('was-validated');
+        });
+
+        // Real-time validation
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+
+        // Auto-dismiss error alerts after 10 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const errorAlerts = document.querySelectorAll('.alert-danger');
+                errorAlerts.forEach(alert => {
+                    if (alert.querySelector('.btn-close')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 10000);
+        });
+    </script>
+}

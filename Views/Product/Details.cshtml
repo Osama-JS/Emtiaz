@@ -1,0 +1,248 @@
+@model Emtias.Models.Scaffolded.Product
+@using Emtias.Models.Scaffolded
+
+@{
+    ViewData["Title"] = "تفاصيل المنتج";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>تفاصيل المنتج</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">المنتجات</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row">
+        <!-- Product Information Card -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-4">
+                            @if (!string.IsNullOrEmpty(Model.IconLink))
+                            {
+                                <img src="@Model.IconLink" alt="@Model.Name" class="product-icon-large rounded-3 shadow" style="width: 100px; height: 100px; object-fit: cover;" onerror="showDefaultIcon(this)">
+                            }
+                            else
+                            {
+                                <div class="product-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow" style="width: 100px; height: 100px; background-color: #e9ecef; border: 2px dashed #dee2e6;">
+                                    <i class="bi bi-box text-muted" style="font-size: 2.5rem;"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="mb-2">@Model.Name</h3>
+                            @if (!string.IsNullOrEmpty(Model.EnName))
+                            {
+                                <p class="text-muted mb-2">@Model.EnName</p>
+                            }
+                            <div class="d-flex flex-wrap gap-2">
+                                @switch (Model.State?.ToLower())
+                                {
+                                    case "new":
+                                        <span class="badge bg-info">جديد</span>
+                                        break;
+                                    case "active":
+                                        <span class="badge bg-success">نشط</span>
+                                        break;
+                                    case "inactive":
+                                        <span class="badge bg-warning">غير نشط</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@Model.State</span>
+                                        break;
+                                }
+                                @if (Model.Deleted == true)
+                                {
+                                    <span class="badge bg-danger">محذوف</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">نشط</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">معلومات أساسية</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>الاسم العربي:</strong></td>
+                                    <td>@Model.Name</td>
+                                </tr>
+                                @if (!string.IsNullOrEmpty(Model.EnName))
+                                {
+                                    <tr>
+                                        <td><strong>الاسم الإنجليزي:</strong></td>
+                                        <td>@Model.EnName</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td><strong>المطعم:</strong></td>
+                                    <td>
+                                        @if (Model.Restaurant != null)
+                                        {
+                                            <a href="/Restaurant/Details/@Model.Restaurant.Id" class="text-decoration-none">
+                                                <span class="badge bg-primary">@Model.Restaurant.Name</span>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">غير محدد</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>الحالة:</strong></td>
+                                    <td>@Model.State</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">معلومات النظام</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>معرف المنتج:</strong></td>
+                                    <td><code>@Model.Id</code></td>
+                                </tr>
+                                @if (Model.CreateAt.HasValue)
+                                {
+                                    <tr>
+                                        <td><strong>تاريخ الإنشاء:</strong></td>
+                                        <td>@Model.CreateAt.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td><strong>الحالة العامة:</strong></td>
+                                    <td>@(Model.Deleted == true ? "محذوف" : "نشط")</td>
+                                </tr>
+                                @if (!string.IsNullOrEmpty(Model.IconLink))
+                                {
+                                    <tr>
+                                        <td><strong>رابط الأيقونة:</strong></td>
+                                        <td>
+                                            <a href="@Model.IconLink" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-link-45deg me-1"></i>
+                                                عرض الأيقونة
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics and Actions -->
+        <div class="col-lg-4">
+            <!-- Statistics Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">إحصائيات المنتج</h6>
+                    <div class="row text-center">
+                        <div class="col-12 mb-3">
+                            <div class="border-bottom pb-2">
+                                <div class="text-primary">
+                                    <i class="bi bi-percent" style="font-size: 2rem;"></i>
+                                </div>
+                                <h4 class="mb-0">@(Model.Offers?.Count ?? 0)</h4>
+                                <small class="text-muted">العروض المتاحة</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-success">
+                                <i class="bi bi-cart" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="mb-0">@(Model.Carts?.Count ?? 0)</h5>
+                            <small class="text-muted">في السلة</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-warning">
+                                <i class="bi bi-bag" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="mb-0">@(Model.OrderItems?.Count ?? 0)</h5>
+                            <small class="text-muted">الطلبات</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">الإجراءات</h6>
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="bi bi-pencil me-1"></i>
+                            تعديل المنتج
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            حذف المنتج
+                        </a>
+                        <hr>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            العودة للقائمة
+                        </a>
+                        @if (Model.Restaurant != null)
+                        {
+                            <a href="/Restaurant/Details/@Model.Restaurant.Id" class="btn btn-outline-primary">
+                                <i class="bi bi-building me-1"></i>
+                                عرض المطعم
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+@section Scripts {
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="product-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow" style="width: 100px; height: 100px; background-color: #e9ecef; border: 2px dashed #dee2e6;">
+                    <i class="bi bi-box text-muted" style="font-size: 2.5rem;"></i>
+                </div>
+            `;
+        }
+
+        // Copy product ID to clipboard
+        document.addEventListener('DOMContentLoaded', function() {
+            const productIdElement = document.querySelector('code');
+            if (productIdElement) {
+                productIdElement.style.cursor = 'pointer';
+                productIdElement.title = 'انقر لنسخ المعرف';
+
+                productIdElement.addEventListener('click', function() {
+                    navigator.clipboard.writeText(this.textContent).then(function() {
+                        // Show success message
+                        const originalText = productIdElement.textContent;
+                        productIdElement.textContent = 'تم النسخ!';
+                        productIdElement.classList.add('text-success');
+
+                        setTimeout(function() {
+                            productIdElement.textContent = originalText;
+                            productIdElement.classList.remove('text-success');
+                        }, 2000);
+                    });
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,401 @@
+@model Emtias.Models.Scaffolded.Restaurant
+
+@{
+    ViewData["Title"] = "تعديل المطعم";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>تعديل المطعم</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">المطاعم</a></li>
+            <li class="breadcrumb-item active">تعديل</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">تعديل معلومات المطعم</h5>
+
+                    <form asp-action="Edit" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+
+                        <!-- Model Errors Display -->
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>يرجى تصحيح الأخطاء التالية:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Current Icon Display -->
+                        <div class="col-12 text-center mb-4">
+                            <div class="icon-preview-container">
+                                <div id="iconPreview" class="icon-preview mx-auto mb-3" style="width: 120px; height: 120px; border: 2px dashed #dee2e6; border-radius: 12px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                    @if (!string.IsNullOrEmpty(Model.IconLink))
+                                    {
+                                        <img src="@Model.IconLink" alt="@Model.Name" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;" onerror="showDefaultIcon(this)">
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-shop text-muted" style="font-size: 3rem;"></i>
+                                    }
+                                </div>
+                                <p class="text-muted small">الأيقونة الحالية للمطعم</p>
+                            </div>
+                        </div>
+
+                        
+
+                        <!-- Basic Information -->
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label">الاسم العربي *</label>
+                            <input asp-for="Name" class="form-control" placeholder="اسم المطعم بالعربية" required />
+                            <span asp-validation-for="Name" class="invalid-feedback"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="EnName" class="form-label">الاسم الإنجليزي</label>
+                            <input asp-for="EnName" class="form-control" placeholder="Restaurant Name in English" />
+                            <span asp-validation-for="EnName" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Category Selection -->
+                        <div class="col-md-6">
+                            <label asp-for="CatgoryId" class="form-label">القسم *</label>
+                            <select asp-for="CatgoryId" class="form-select" asp-items="ViewBag.CatgoryId" required>
+                                <option value="">اختر القسم</option>
+                            </select>
+                            <span asp-validation-for="CatgoryId" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <label class="form-label">حالة المطعم</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" asp-for="Deleted" id="deletedSwitch">
+                                <label class="form-check-label" for="deletedSwitch">
+                                    محذوف (غير نشط)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Icon Update Options -->
+                        <div class="col-12">
+                            <label class="form-label">تحديث أيقونة المطعم</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="iconFile" class="form-label">رفع صورة جديدة</label>
+                                    <input type="file" class="form-control" id="iconFile" name="iconFile" accept="image/*" onchange="previewIcon(this)">
+                                    <div class="form-text">اختر صورة جديدة للأيقونة (PNG, JPG, SVG)</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="IconLink" class="form-label">أو تحديث رابط الأيقونة</label>
+                                    <input asp-for="IconLink" class="form-control" placeholder="https://example.com/icon.png" onchange="previewIconFromUrl(this.value)" />
+                                    <span asp-validation-for="IconLink" class="invalid-feedback"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address and Details -->
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label">العنوان</label>
+                            <input asp-for="Address" class="form-control" placeholder="عنوان المطعم" />
+                            <span asp-validation-for="Address" class="invalid-feedback"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Details" class="form-label">التفاصيل</label>
+                            <textarea asp-for="Details" class="form-control" rows="4" placeholder="تفاصيل إضافية عن المطعم"></textarea>
+                            <span asp-validation-for="Details" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Location Coordinates -->
+                        <div class="col-md-6">
+                            <label asp-for="Lat" class="form-label">خط العرض (Latitude)</label>
+                            <input asp-for="Lat" class="form-control" placeholder="24.7136" />
+                            <span asp-validation-for="Lat" class="invalid-feedback"></span>
+                            <div class="form-text">إحداثيات الموقع الجغرافي</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Lng" class="form-label">خط الطول (Longitude)</label>
+                            <input asp-for="Lng" class="form-control" placeholder="46.6753" />
+                            <span asp-validation-for="Lng" class="invalid-feedback"></span>
+                            <div class="form-text">إحداثيات الموقع الجغرافي</div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a asp-action="Index" class="btn btn-secondary me-2">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        العودة للقائمة
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                                        <i class="bi bi-eye me-1"></i>
+                                        عرض التفاصيل
+                                    </a>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        إعادة تعيين
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        حفظ التغييرات
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <style>
+        .alert-danger {
+            border-left: 4px solid #dc3545;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-danger ul {
+            margin-bottom: 0;
+            padding-left: 1.5rem;
+        }
+
+        .alert-danger li {
+            margin-bottom: 0.25rem;
+        }
+
+        .invalid-feedback {
+            display: block;
+            font-size: 0.875rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+
+    <script>
+        // Store original values for reset functionality
+        const originalValues = {
+            Name: '@Html.Raw(Model.Name)',
+            EnName: '@Html.Raw(Model.EnName)',
+            Details: '@Html.Raw(Model.Details)',
+            Address: '@Html.Raw(Model.Address)',
+            IconLink: '@Html.Raw(Model.IconLink)',
+            Deleted: @Model.Deleted.ToString().ToLower(),
+            CatgoryId: '@Model.CatgoryId',
+            Lat: '@Html.Raw(Model.Lat)',
+            Lng: '@Html.Raw(Model.Lng)'
+        };
+
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="default-icon-display d-flex align-items-center justify-content-center rounded-3 shadow-sm" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 2px dashed #dee2e6; margin: 0 auto;">
+                    <i class="bi bi-shop text-muted" style="font-size: 3rem;"></i>
+                </div>
+            `;
+        }
+
+        // Preview icon from file upload
+        function previewIcon(input) {
+            const preview = document.getElementById('iconPreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'حجم الملف كبير جداً',
+                        text: 'حجم الملف يجب أن يكون أقل من 5 ميجابايت'
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+                if (!allowedTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'نوع الملف غير مدعوم',
+                        text: 'يرجى اختيار صورة بصيغة JPG, PNG, GIF, WebP, أو SVG'
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+
+                    // Clear the URL input when file is selected
+                    document.querySelector('input[name="IconLink"]').value = '';
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Preview icon from URL
+        function previewIconFromUrl(url) {
+            const preview = document.getElementById('iconPreview');
+
+            if (url) {
+                const img = new Image();
+                img.onload = function() {
+                    preview.innerHTML = `<img src="${url}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+
+                    // Clear the file input when URL is entered
+                    document.getElementById('iconFile').value = '';
+                };
+                img.onerror = function() {
+                    preview.innerHTML = `
+                        <div class="text-danger">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">لا يمكن تحميل الصورة</p>
+                        </div>
+                    `;
+                };
+                img.src = url;
+            } else {
+                // Show original icon if URL is cleared
+                if (originalValues.IconLink) {
+                    const img = new Image();
+                    img.onload = function() {
+                        preview.innerHTML = `<img src="${originalValues.IconLink}" alt="Original" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+                    };
+                    img.onerror = function() {
+                        preview.innerHTML = `<i class="bi bi-shop text-muted" style="font-size: 3rem;"></i>`;
+                    };
+                    img.src = originalValues.IconLink;
+                } else {
+                    preview.innerHTML = `<i class="bi bi-shop text-muted" style="font-size: 3rem;"></i>`;
+                }
+            }
+        }
+
+        // Reset form to original values
+        function resetForm() {
+            Swal.fire({
+                title: 'إعادة تعيين النموذج؟',
+                text: 'سيتم إلغاء جميع التغييرات والعودة للقيم الأصلية',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'نعم، أعد التعيين',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Reset all form fields
+                    for (const [key, value] of Object.entries(originalValues)) {
+                        const field = document.querySelector(`[name="${key}"]`);
+                        if (field) {
+                            if (field.type === 'checkbox') {
+                                field.checked = value === 'true';
+                            } else {
+                                field.value = value || '';
+                            }
+                        }
+                    }
+
+                    // Reset icon preview
+                    previewIconFromUrl(originalValues.IconLink);
+
+                    // Clear file input
+                    document.getElementById('iconFile').value = '';
+
+                    // Remove validation classes
+                    document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                        el.classList.remove('is-valid', 'is-invalid');
+                    });
+
+                    Swal.fire('تم!', 'تم إعادة تعيين النموذج بنجاح', 'success');
+                }
+            });
+        }
+
+        // Track changes for unsaved warning
+        let hasUnsavedChanges = false;
+
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('input', function() {
+                hasUnsavedChanges = true;
+            });
+        });
+
+        // Warn about unsaved changes
+        window.addEventListener('beforeunload', function(e) {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            hasUnsavedChanges = false; // Don't warn after successful submission
+        });
+
+        // Real-time validation
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+
+        // Auto-dismiss error alerts after 10 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const errorAlerts = document.querySelectorAll('.alert-danger');
+                errorAlerts.forEach(alert => {
+                    if (alert.querySelector('.btn-close')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 10000);
+        });
+    </script>
+}

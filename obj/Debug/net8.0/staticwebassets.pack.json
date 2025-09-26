@@ -2237,6 +2237,10 @@
       "PackagePath": "staticwebassets\\images\\cade377c-9f38-43c6-a011-b481e85f03dc.png"
     },
     {
+      "Id": "H:\\bassam\\Emtias\\wwwroot\\images\\categories\\README.md",
+      "PackagePath": "staticwebassets\\images\\categories\\README.md"
+    },
+    {
       "Id": "H:\\bassam\\Emtias\\wwwroot\\images\\ce1ca8cf-4a41-4149-affd-6bbf5a7c3bee.png",
       "PackagePath": "staticwebassets\\images\\ce1ca8cf-4a41-4149-affd-6bbf5a7c3bee.png"
     },
@@ -2259,6 +2263,10 @@
     {
       "Id": "H:\\bassam\\Emtias\\wwwroot\\images\\fef6be49-3e60-4091-aed2-19449bce1977.png",
       "PackagePath": "staticwebassets\\images\\fef6be49-3e60-4091-aed2-19449bce1977.png"
+    },
+    {
+      "Id": "H:\\bassam\\Emtias\\wwwroot\\images\\products\\README.md",
+      "PackagePath": "staticwebassets\\images\\products\\README.md"
     },
     {
       "Id": "H:\\bassam\\Emtias\\wwwroot\\js\\jquery-1.10.2.min.js",

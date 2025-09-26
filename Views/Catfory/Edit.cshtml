@@ -1,0 +1,340 @@
+@model Emtias.Models.Scaffolded.Catgory
+
+@{
+    ViewData["Title"] = "تعديل القسم";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>تعديل القسم</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">الأقسام</a></li>
+            <li class="breadcrumb-item active">تعديل</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">تعديل معلومات القسم</h5>
+                        <div class="text-muted">
+                            <small>رقم القسم: #@Model.Id</small>
+                        </div>
+                    </div>
+
+                    <form asp-action="Edit" class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+
+                        <!-- Model Errors Display -->
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>يرجى تصحيح الأخطاء التالية:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Current Icon Display -->
+                        <div class="col-12 text-center mb-4">
+                            <div class="icon-preview-container">
+                                <div id="iconPreview" class="icon-preview mx-auto mb-3" style="width: 120px; height: 120px; border: 2px dashed #dee2e6; border-radius: 12px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                    @if (!string.IsNullOrEmpty(Model.IconLink))
+                                    {
+                                        <img src="@Model.IconLink" alt="@Model.Name" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;" onerror="showDefaultIcon(this)">
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                    }
+                                </div>
+                                <p class="text-muted small">الأيقونة الحالية</p>
+                            </div>
+                        </div>
+
+                        <!-- Arabic Name -->
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label">الاسم العربي <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="أدخل اسم القسم بالعربية" required />
+                            <span asp-validation-for="Name" class="invalid-feedback"></span>
+                            <div class="form-text">اسم القسم كما سيظهر للمستخدمين العرب</div>
+                        </div>
+
+                        <!-- English Name -->
+                        <div class="col-md-6">
+                            <label asp-for="EnName" class="form-label">الاسم الإنجليزي <span class="text-danger">*</span></label>
+                            <input asp-for="EnName" class="form-control" placeholder="Enter category name in English" required />
+                            <span asp-validation-for="EnName" class="invalid-feedback"></span>
+                            <div class="form-text">اسم القسم كما سيظهر للمستخدمين الأجانب</div>
+                        </div>
+
+                        <!-- Icon Update Options -->
+                        <div class="col-12">
+                            <label class="form-label">تحديث أيقونة القسم</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="iconFile" class="form-label">رفع صورة جديدة</label>
+                                    <input type="file" class="form-control" id="iconFile" name="iconFile" accept="image/*" onchange="previewIcon(this)">
+                                    <div class="form-text">اختر صورة جديدة للأيقونة (PNG, JPG, SVG)</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="IconLink" class="form-label">أو تحديث رابط الأيقونة</label>
+                                    <input asp-for="IconLink" class="form-control" placeholder="https://example.com/icon.png" onchange="previewIconFromUrl(this.value)" />
+                                    <span asp-validation-for="IconLink" class="invalid-feedback"></span>
+                                    <div class="form-text">أدخل رابط مباشر جديد للأيقونة</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <!-- Action Buttons -->
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a asp-action="Index" class="btn btn-secondary me-2">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        العودة للقائمة
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                                        <i class="bi bi-eye me-1"></i>
+                                        عرض التفاصيل
+                                    </a>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        إعادة تعيين
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        حفظ التغييرات
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <style>
+        .alert-danger {
+            border-left: 4px solid #dc3545;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-danger ul {
+            margin-bottom: 0;
+            padding-left: 1.5rem;
+        }
+
+        .alert-danger li {
+            margin-bottom: 0.25rem;
+        }
+
+        .invalid-feedback {
+            display: block;
+            font-size: 0.875rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+
+    <script>
+        // Store original values for reset functionality
+        const originalValues = {
+            name: '@Html.Raw(Model.Name)',
+            enName: '@Html.Raw(Model.EnName)',
+            iconLink: '@Html.Raw(Model.IconLink)'
+        };
+
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const preview = document.getElementById('iconPreview');
+            preview.innerHTML = `<i class="bi bi-image text-muted" style="font-size: 3rem;"></i>`;
+        }
+
+        // Preview icon from file upload
+        function previewIcon(input) {
+            const preview = document.getElementById('iconPreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'حجم الملف كبير جداً',
+                        text: 'حجم الملف يجب أن يكون أقل من 5 ميجابايت'
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+                if (!allowedTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'نوع الملف غير مدعوم',
+                        text: 'يرجى اختيار صورة بصيغة JPG, PNG, GIF, WebP, أو SVG'
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+
+                    // Clear the URL input when file is selected
+                    document.querySelector('input[name="IconLink"]').value = '';
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Preview icon from URL
+        function previewIconFromUrl(url) {
+            const preview = document.getElementById('iconPreview');
+
+            if (url && url.trim() !== '') {
+                // Clear file input when URL is entered
+                document.getElementById('iconFile').value = '';
+
+                // Create image element to test if URL is valid
+                const img = new Image();
+                img.onload = function() {
+                    preview.innerHTML = `<img src="${url}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+                };
+                img.onerror = function() {
+                    preview.innerHTML = `<div class="text-danger"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i><br><small>رابط غير صحيح</small></div>`;
+                };
+                img.src = url;
+            } else {
+                resetPreview();
+            }
+        }
+
+        // Reset preview to original state
+        function resetPreview() {
+            const preview = document.getElementById('iconPreview');
+            if (originalValues.iconLink && originalValues.iconLink.trim() !== '') {
+                preview.innerHTML = `<img src="${originalValues.iconLink}" alt="Original" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;" onerror="showDefaultIcon(this)">`;
+            } else {
+                preview.innerHTML = `<i class="bi bi-image text-muted" style="font-size: 3rem;"></i>`;
+            }
+        }
+
+        // Reset form to original values
+        function resetForm() {
+            // Reset form fields
+            document.querySelector('input[name="Name"]').value = originalValues.name;
+            document.querySelector('input[name="EnName"]').value = originalValues.enName;
+            document.querySelector('input[name="IconLink"]').value = originalValues.iconLink;
+
+            // Clear file input
+            document.getElementById('iconFile').value = '';
+
+            // Reset preview
+            resetPreview();
+
+            // Remove validation classes
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+            document.querySelector('form').classList.remove('was-validated');
+        }
+
+        // Form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.needs-validation');
+
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            });
+
+            // Real-time validation
+            const inputs = form.querySelectorAll('input[required]');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.checkValidity()) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                });
+            });
+
+            // Track changes for unsaved changes warning
+            let hasUnsavedChanges = false;
+            const trackableInputs = form.querySelectorAll('input[name="Name"], input[name="EnName"], input[name="IconLink"]');
+
+            trackableInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    hasUnsavedChanges = true;
+                });
+            });
+
+            // Warn about unsaved changes when leaving page
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = 'لديك تغييرات غير محفوظة. هل تريد المغادرة؟';
+                }
+            });
+
+            // Remove warning when form is submitted
+            form.addEventListener('submit', function() {
+                hasUnsavedChanges = false;
+            });
+
+            // Auto-dismiss error alerts after 10 seconds
+            setTimeout(function() {
+                const errorAlerts = document.querySelectorAll('.alert-danger');
+                errorAlerts.forEach(alert => {
+                    if (alert.querySelector('.btn-close')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 10000);
+        });
+    </script>
+}

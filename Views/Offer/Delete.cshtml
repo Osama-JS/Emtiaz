@@ -1,0 +1,254 @@
+@model Emtias.Models.Scaffolded.Offer
+
+@{
+    ViewData["Title"] = "حذف العرض";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>حذف العرض</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">العروض</a></li>
+            <li class="breadcrumb-item active">حذف</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>تحذير!</strong> هذا الإجراء لا يمكن التراجع عنه. سيتم حذف العرض وجميع البيانات المرتبطة به
+                نهائياً.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="card border-danger">
+                 <div class="card-header bg-danger mb-3">
+                        <h5 class="card-title mb-0 text-white">
+                            <i class="bi bi-trash me-2"></i>
+                            تأكيد حذف العرض
+                        </h5>
+                    </div>
+                <div class="card-body">
+                    
+
+                    <!-- Offer Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            <div class="offer-icon-container mb-3">
+                                <div class="offer-icon-placeholder rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 2px solid #dee2e6; margin: 0 auto;">
+                                    <i class="bi bi-tag text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            </div>
+
+                            <!-- Status Badge -->
+                            @switch (Model.State?.ToLower())
+                            {
+                                case "active":
+                                    <span class="badge bg-success">نشط</span>
+                                    break;
+                                case "inactive":
+                                    <span class="badge bg-secondary">غير نشط</span>
+                                    break;
+                                case "expired":
+                                    <span class="badge bg-danger">منتهي الصلاحية</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-light text-dark">@(Model.State ?? "غير محدد")</span>
+                                    break;
+                            }
+                        </div>
+
+                        <div class="col-md-9">
+                            <h4 class="text-danger mb-3">@Model.Name</h4>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-5 text-muted">السعر:</dt>
+                                        <dd class="col-sm-7"><strong class="text-success">@((decimal)(Model.Price ?? 0))</strong></dd>
+
+                                        @if (Model.DeleverCost > 0)
+                                        {
+                                            <dt class="col-sm-5 text-muted">تكلفة التوصيل:</dt>
+                                            <dd class="col-sm-7"><span class="text-info">@((decimal)(Model.DeleverCost ?? 0))</span></dd>
+                                        }
+
+                                        @if (Model.Discount > 0)
+                                        {
+                                            <dt class="col-sm-5 text-muted">الخصم:</dt>
+                                            <dd class="col-sm-7"><span class="badge bg-danger">@Model.Discount%</span></dd>
+                                        }
+                                    </dl>
+                                </div>
+                                <div class="col-sm-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-5 text-muted">المطعم:</dt>
+                                        <dd class="col-sm-7"><span class="badge bg-info">@Model.Restaurant?.Name</span></dd>
+
+                                        @if (Model.Product != null)
+                                        {
+                                            <dt class="col-sm-5 text-muted">المنتج:</dt>
+                                            <dd class="col-sm-7"><span class="badge bg-secondary">@Model.Product.Name</span></dd>
+                                        }
+
+                                        @if (Model.Units.HasValue && Model.Units > 0)
+                                        {
+                                            <dt class="col-sm-5 text-muted">الوحدات:</dt>
+                                            <dd class="col-sm-7"><span class="badge bg-primary">@Model.Units</span></dd>
+                                        }
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <!-- Offer Duration -->
+                            @if (Model.StartDate.HasValue || Model.EndDate.HasValue)
+                            {
+                                <div class="mt-3">
+                                    <h6 class="text-muted mb-2">فترة العرض:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if (Model.StartDate.HasValue)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-calendar-check me-1"></i>
+                                                من: @Model.StartDate.Value.ToString("dd/MM/yyyy")
+                                            </span>
+                                        }
+                                        @if (Model.EndDate.HasValue)
+                                        {
+                                            <span class="badge @(Model.EndDate < DateTime.Now ? "bg-danger" : "bg-warning")">
+                                                <i class="bi bi-calendar-x me-1"></i>
+                                                إلى: @Model.EndDate.Value.ToString("dd/MM/yyyy")
+                                                @if (Model.EndDate < DateTime.Now)
+                                                {
+                                                    <small> (منتهي)</small>
+                                                }
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    
+
+                    <!-- Delete Form -->
+                    <form asp-action="Delete" method="post" id="deleteForm">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                العودة للقائمة
+                            </a>
+                            <div>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info me-2">
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض التفاصيل
+                                </a>
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                    <i class="bi bi-trash me-1"></i>
+                                    تأكيد الحذف
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <style>
+        .card.border-danger {
+            border-width: 2px !important;
+        }
+
+        .offer-icon-container img {
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .alert-warning {
+            border-left: 4px solid #ffc107;
+        }
+
+        code {
+            color: #6f42c1;
+            background-color: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+
+    <script>
+        // Confirm delete with SweetAlert
+        function confirmDelete() {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'هل أنت متأكد من رغبتك في حذف هذا العرض؟ لا يمكن التراجع عن هذا الإجراء!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'نعم، احذف العرض',
+                cancelButtonText: 'إلغاء',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'جاري الحذف...',
+                        text: 'يرجى الانتظار',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit the form
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+
+        // Show default icon on error
+        function showDefaultOfferIcon(img) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'offer-icon-placeholder rounded-3 d-flex align-items-center justify-content-center shadow-sm';
+            placeholder.style.cssText = 'width: 120px; height: 120px; background-color: #f8f9fa; border: 2px solid #dee2e6; margin: 0 auto;';
+            placeholder.innerHTML = '<i class="bi bi-tag text-muted" style="font-size: 3rem;"></i>';
+            img.parentNode.replaceChild(placeholder, img);
+        }
+
+        // Add hover effect to delete button
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButton = document.querySelector('button[onclick="confirmDelete()"]');
+            if (deleteButton) {
+                deleteButton.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.transition = 'transform 0.2s ease-in-out';
+                    this.style.boxShadow = '0 4px 8px rgba(220, 53, 69, 0.3)';
+                });
+
+                deleteButton.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+            }
+        });
+
+        // Prevent accidental form submission
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            confirmDelete();
+        });
+    </script>
+}

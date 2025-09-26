@@ -1,0 +1,260 @@
+@model Emtias.Models.Scaffolded.Restaurant
+
+@{
+    ViewData["Title"] = "حذف المطعم";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>حذف المطعم</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">المطاعم</a></li>
+            <li class="breadcrumb-item active">حذف</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Warning Alert -->
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>تحذير!</strong> هذا الإجراء لا يمكن التراجع عنه. سيتم حذف المطعم وجميع البيانات المرتبطة به نهائياً.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-danger mb-3">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-trash me-2"></i>
+                        تأكيد حذف المطعم
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Restaurant Preview -->
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-3 text-center">
+                            @if (!string.IsNullOrEmpty(Model.IconLink))
+                            {
+                                <img src="@Model.IconLink" alt="@Model.Name" class="restaurant-icon-large rounded-3 shadow" style="width: 100px; height: 100px; object-fit: cover;" onerror="showDefaultIcon(this)">
+                            }
+                            else
+                            {
+                                <div class="restaurant-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; background-color: #f8f9fa; border: 2px dashed #dee2e6;">
+                                    <i class="bi bi-shop text-muted" style="font-size: 2.5rem;"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-9">
+                            <h3 class="text-danger mb-2">@Model.Name</h3>
+                            @if (!string.IsNullOrEmpty(Model.EnName))
+                            {
+                                <h5 class="text-muted mb-3">@Model.EnName</h5>
+                            }
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                @if (Model.Catgory != null)
+                                {
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-tag me-1"></i>
+                                        @Model.Catgory.Name
+                                    </span>
+                                }
+                                <span class="badge @(Model.Deleted ? "bg-secondary" : "bg-success")">
+                                    <i class="bi bi-@(Model.Deleted ? "x-circle" : "check-circle") me-1"></i>
+                                    @(Model.Deleted ? "محذوف" : "نشط")
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Address))
+                            {
+                                <p class="text-muted mb-1">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    @Model.Address
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Impact Assessment -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-warning mb-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                تأثير الحذف على البيانات المرتبطة:
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center py-3">
+                                            <i class="bi bi-box text-warning" style="font-size: 2rem;"></i>
+                                            <h6 class="mt-2 mb-1">المنتجات</h6>
+                                            <span class="badge bg-warning">@(Model.Products?.Count ?? 0)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center py-3">
+                                            <i class="bi bi-percent text-warning" style="font-size: 2rem;"></i>
+                                            <h6 class="mt-2 mb-1">العروض</h6>
+                                            <span class="badge bg-warning">@(Model.Offers?.Count ?? 0)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center py-3">
+                                            <i class="bi bi-calendar2-event text-warning" style="font-size: 2rem;"></i>
+                                            <h6 class="mt-2 mb-1">الحجوزات</h6>
+                                            <span class="badge bg-warning">@(Model.Reservations?.Count ?? 0)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center py-3">
+                                            <i class="bi bi-chat-dots text-warning" style="font-size: 2rem;"></i>
+                                            <h6 class="mt-2 mb-1">التعليقات</h6>
+                                            <span class="badge bg-warning">@(Model.RestaurantsComments?.Count ?? 0)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Restaurant Details -->
+                    @if (!string.IsNullOrEmpty(Model.Details))
+                    {
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">تفاصيل المطعم:</h6>
+                            <p class="text-muted">@Model.Details</p>
+                        </div>
+                    }
+
+                    <!-- Location Info -->
+                    @if (!string.IsNullOrEmpty(Model.Lat) && !string.IsNullOrEmpty(Model.Lng))
+                    {
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">الموقع الجغرافي:</h6>
+                            <p class="text-muted">
+                                <i class="bi bi-pin-map me-2"></i>
+                                الإحداثيات: @Model.Lat, @Model.Lng
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Confirmation Form -->
+                    <form asp-action="Delete" method="post" asp-route-id="@Model.Id" id="deleteForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                إلغاء والعودة
+                            </a>
+                            <div>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info me-2">
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض التفاصيل
+                                </a>
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                    <i class="bi bi-trash me-1"></i>
+                                    تأكيد الحذف
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="restaurant-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; background-color: #f8f9fa; border: 2px dashed #dee2e6;">
+                    <i class="bi bi-shop text-muted" style="font-size: 2.5rem;"></i>
+                </div>
+            `;
+        }
+
+        // Confirm delete with SweetAlert
+        function confirmDelete() {
+            console.log('confirmDelete called');
+
+            Swal.fire({
+                title: 'هل أنت متأكد ؟',
+                html: `
+                    <div class="text-start">
+                        <p class="mb-3">هذا الإجراء لا يمكن التراجع عنه. سيتم حذف المطعم "<strong>@Model.Name</strong>" نهائياً!</p>
+                        <div class="alert alert-warning">
+                            سيتأثر التالي: 
+                            <ul class="mb-0 mt-2">
+                                <li>@(Model.Products?.Count ?? 0) منتج</li>
+                                <li>@(Model.Offers?.Count ?? 0) عرض</li>
+                                <li>@(Model.Reservations?.Count ?? 0) حجز</li>
+                                <li>@(Model.RestaurantsComments?.Count ?? 0) تعليق</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'نعم، احذف المطعم نهائياً',
+                cancelButtonText: 'إلغاء',
+                reverseButtons: true,
+                focusCancel: true
+            }).then((result) => {
+                if (result.value) {
+
+                    // Show loading
+                    Swal.fire({
+                        title: 'جاري الحذف...',
+                        text: 'يرجى الانتظار',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit the form
+                    setTimeout(() => {
+                        document.getElementById('deleteForm').submit();
+                    }, 1000);
+                }
+            });
+        }
+
+        // Add hover effect to delete button
+        const deleteButton = document.querySelector('button[onclick="confirmDelete()"]');
+        if (deleteButton) {
+            deleteButton.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s ease-in-out';
+                this.style.boxShadow = '0 4px 8px rgba(220, 53, 69, 0.3)';
+            });
+
+            deleteButton.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `@@keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }`;
+        document.head.appendChild(style);
+    </script>
+}

@@ -1,8 +1,339 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "لوحة التحكم الرئيسية";
+    var stats = ViewBag.Stats;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="bi bi-speedometer2 text-primary me-2"></i>
+                        لوحة التحكم الرئيسية
+                    </h1>
+                    <p class="text-muted mb-0">نظرة عامة على إحصائيات النظام</p>
+                </div>
+                <div class="text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    @DateTime.Now.ToString("yyyy/MM/dd - HH:mm")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Categories Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                الأقسام
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@stats.TotalCategories</div>
+                            <div class="text-xs text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                @stats.CategoriesWithRestaurants منها يحتوي على مطاعم
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-grid-3x3-gap fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurants Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                المطاعم
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@stats.TotalRestaurants</div>
+                            <div class="text-xs">
+                                <span class="text-success">@stats.ActiveRestaurants نشط</span>
+                                @if (stats.DeletedRestaurants > 0)
+                                {
+                                    <span class="text-danger ms-2">@stats.DeletedRestaurants محذوف</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-shop fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                المنتجات
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@stats.TotalProducts</div>
+                            <div class="text-xs">
+                                <span class="text-success">@stats.ActiveProducts نشط</span>
+                                <span class="text-warning ms-2">@stats.NewProducts جديد</span>
+                                @if (stats.InactiveProducts > 0)
+                                {
+                                    <span class="text-muted ms-2">@stats.InactiveProducts غير نشط</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offers Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                العروض
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@stats.TotalOffers</div>
+                            <div class="text-xs">
+                                <span class="text-success">@stats.ActiveOffers نشط</span>
+                                @if (stats.ExpiredOffers > 0)
+                                {
+                                    <span class="text-danger ms-2">@stats.ExpiredOffers منتهي</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-tag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-lightning me-2"></i>
+                        إجراءات سريعة
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Create", "Catfory")" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                إضافة قسم جديد
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Create", "Restaurant")" class="btn btn-outline-success w-100">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                إضافة مطعم جديد
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Create", "Product")" class="btn btn-outline-info w-100">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                إضافة منتج جديد
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Create", "Offer")" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                إضافة عرض جديد
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
 </div>
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+
+    .fa-2x {
+        font-size: 2em;
+    }
+
+    .card {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .progress-bar {
+        transition: width 0.6s ease;
+    }
+
+    .text-xs {
+        font-size: 0.75rem;
+    }
+
+    .text-sm {
+        font-size: 0.875rem;
+    }
+
+    .font-weight-bold {
+        font-weight: 700 !important;
+    }
+
+    .no-gutters {
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .no-gutters > .col,
+    .no-gutters > [class*="col-"] {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    /* Custom animations */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    .card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .h5 {
+            font-size: 1.1rem;
+        }
+
+        .fa-2x {
+            font-size: 1.5em;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+    }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        .text-gray-800 {
+            color: #e3e6f0 !important;
+        }
+
+        .text-gray-300 {
+            color: #858796 !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // تحديث الوقت كل دقيقة
+        setInterval(function() {
+            const now = new Date();
+            const timeString = now.getFullYear() + '/' +
+                             String(now.getMonth() + 1).padStart(2, '0') + '/' +
+                             String(now.getDate()).padStart(2, '0') + ' - ' +
+                             String(now.getHours()).padStart(2, '0') + ':' +
+                             String(now.getMinutes()).padStart(2, '0');
+
+            const timeElement = document.querySelector('.text-muted i.bi-calendar3').parentElement;
+            if (timeElement) {
+                timeElement.innerHTML = '<i class="bi bi-calendar3 me-1"></i>' + timeString;
+            }
+        }, 60000);
+
+        // إضافة تأثيرات hover للبطاقات
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // إضافة tooltips للأشرطة التقدمية
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            if (bar.title) {
+                bar.setAttribute('data-bs-toggle', 'tooltip');
+                bar.setAttribute('data-bs-placement', 'top');
+            }
+        });
+
+        // تفعيل Bootstrap tooltips
+        if (typeof bootstrap !== 'undefined') {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+    });
+</script>

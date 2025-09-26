@@ -1,0 +1,248 @@
+@model Emtias.Models.Scaffolded.Catgory
+
+@{
+    ViewData["Title"] = "حذف القسم";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>حذف القسم</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">الأقسام</a></li>
+            <li class="breadcrumb-item active">حذف</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Warning Alert -->
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>تحذير!</strong> هذا الإجراء لا يمكن التراجع عنه. سيتم حذف القسم وجميع البيانات المرتبطة به نهائياً.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+
+            <!-- Category Information Card -->
+            <div class="card border-danger">
+                <div class="card-header bg-danger mb-4 ">
+                    <h5 class="card-title text-white">
+                        <i class="bi bi-trash me-2"></i>
+                        تأكيد حذف القسم
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Icon Display -->
+                        <div class="col-md-3 text-center mb-4">
+                            <div class="category-icon-display">
+                                @if (!string.IsNullOrEmpty(Model.IconLink))
+                                {
+                                    <img src="@Model.IconLink" alt="@Model.Name" class="img-fluid rounded-3 shadow-sm" style="max-width: 120px; max-height: 120px; object-fit: cover;" onerror="showDefaultIcon(this)">
+                                }
+                                else
+                                {
+                                    <div class="default-icon-display d-flex align-items-center justify-content-center rounded-3 shadow-sm" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 2px dashed #dee2e6; margin: 0 auto;">
+                                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Category Details -->
+                        <div class="col-md-9">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted">رقم القسم</label>
+                                    <div class=" rounded p-2">
+                                        <strong>#@Model.Id</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted">عدد المطاعم</label>
+                                    <div class=" rounded p-2">
+                                        <span class="badge bg-info">@Model.Restaurants.Count مطعم</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label text-muted">الاسم العربي</label>
+                                    <div class=" rounded p-3">
+                                        <h5 class="mb-0 ">@Model.Name</h5>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label text-muted">الاسم الإنجليزي</label>
+                                    <div class=" rounded p-3">
+                                        <h6 class="mb-0">@Model.EnName</h6>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impact Warning -->
+            @if (Model.Restaurants.Count > 0)
+            {
+                <div class="alert alert-warning mt-4 py-2" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        لا يمكنك حذف القسم الحالي لأنه سيؤثر على التالي:
+                    </h6>
+                    <p class="mb-2">حذف هذا القسم سيؤثر على:</p>
+                    <ul class="mb-0">
+                        <li><strong>@Model.Restaurants.Count مطعم</strong> مرتبط بهذا القسم</li>
+                        <li>قد تحتاج إلى إعادة تصنيف المطاعم المرتبطة</li>
+                        <li>ستفقد جميع البيانات المرتبطة بهذا القسم</li>
+                    </ul>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" id="deleteForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="d-flex justify-content-between align-items-center pt-3">
+                            <div>
+                                <a asp-action="Index" class="btn btn-secondary me-2">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة للقائمة
+                                </a>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض التفاصيل
+                                </a>
+                            </div>
+
+                            <div>
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                    <i class="bi bi-trash me-1"></i>
+                                    تأكيد الحذف
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="default-icon-display d-flex align-items-center justify-content-center rounded-3 shadow-sm" style="width: 120px; height: 120px; background-color: #f8f9fa; border: 2px dashed #dee2e6; margin: 0 auto;">
+                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                </div>
+            `;
+        }
+
+        // Confirm delete with SweetAlert
+        function confirmDelete() {
+            console.log('confirmDelete function called');
+            const restaurantCount = @Model.Restaurants.Count;
+            console.log('Restaurant count:', restaurantCount);
+            let warningText = 'هذا الإجراء لا يمكن التراجع عنه!';
+
+            if (restaurantCount > 0) {
+                warningText += `\n\nسيتأثر ${restaurantCount} مطعم بهذا الحذف.`;
+            }
+
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: warningText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'نعم، احذف القسم',
+                cancelButtonText: 'إلغاء',
+                reverseButtons: true,
+                focusCancel: true
+            }).then((result) => {
+                console.log(result);
+                if (result.value) {
+                    console.log('Delete confirmed');
+
+                    // Show loading state
+                    Swal.fire({
+                        title: 'جاري الحذف...',
+                        text: 'يرجى الانتظار',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit the form
+                    setTimeout(() => {
+                        const form = document.getElementById('deleteForm');
+                        console.log('Form found:', form);
+                        console.log('Form action:', form?.action);
+                        console.log('Form method:', form?.method);
+                        if (form) {
+                            console.log('Submitting form...');
+                            form.submit();
+                        } else {
+                            console.error('Delete form not found!');
+                        }
+                    }, 500);
+                }else{
+                    console.log('Faild');
+
+                }
+            });
+        }
+
+        // Add warning animation on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const warningAlert = document.querySelector('.alert-danger');
+            if (warningAlert) {
+                warningAlert.style.animation = 'pulse 2s infinite';
+            }
+
+            // Add hover effect to delete button
+            const deleteButton = document.querySelector('button[onclick="confirmDelete()"]');
+            if (deleteButton) {
+                deleteButton.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.transition = 'transform 0.2s ease-in-out';
+                    this.style.boxShadow = '0 4px 8px rgba(220, 53, 69, 0.3)';
+                });
+
+                deleteButton.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+            }
+        });
+
+        // Add CSS animation for pulse effect
+        const style = document.createElement('style');
+        style.textContent = '@@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }';
+        document.head.appendChild(style);
+
+        // Add form submission handler for debugging
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            console.log('Form submission event triggered');
+            console.log('Form data:', new FormData(this));
+        });
+    </script>
+}

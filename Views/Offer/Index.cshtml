@@ -1,0 +1,551 @@
+@model IEnumerable<Emtias.Models.Scaffolded.Offer>
+
+@{
+    ViewData["Title"] = "إدارة العروض";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>إدارة العروض</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item active">العروض</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Error Message -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">قائمة العروض</h5>
+                        <a class="btn btn-primary" asp-action="Create">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            إضافة عرض جديد
+                        </a>
+                    </div>
+
+                    <!-- Search and Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                
+                                <input type="text" class="form-control" id="searchInput" placeholder="البحث في العروض...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="restaurantFilter">
+                                <option value="">جميع المطاعم</option>
+                                @foreach (var restaurant in Model.Select(o => o.Restaurant).Where(r => r != null).Distinct())
+                                {
+                                    <option value="@restaurant.Id">@restaurant.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="stateFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="expired">منتهي الصلاحية</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="viewMode" id="tableView" value="table" checked onchange="toggleView()">
+                                <label class="btn btn-outline-secondary" for="tableView">
+                                    <i class="bi bi-table"></i> جدول
+                                </label>
+                                <input type="radio" class="btn-check" name="viewMode" id="cardView" value="card" onchange="toggleView()">
+                                <label class="btn btn-outline-secondary" for="cardView">
+                                    <i class="bi bi-grid-3x3-gap"></i> كروت
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sorting Options -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortOffers('name', 'asc')">
+                                    <i class="bi bi-sort-alpha-down"></i> الاسم تصاعدي
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortOffers('name', 'desc')">
+                                    <i class="bi bi-sort-alpha-up"></i> الاسم تنازلي
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortOffers('price', 'asc')">
+                                    <i class="bi bi-sort-numeric-down"></i> السعر
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="sortOffers('date', 'desc')">
+                                    <i class="bi bi-calendar-date"></i> الأحدث
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                إجمالي العروض: <span id="totalCount">@Model.Count()</span> |
+                                العروض المعروضة: <span id="visibleCount">@Model.Count()</span>
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Table View -->
+                    <div id="tableViewContainer">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>الأيقونة</th>
+                                        <th>اسم العرض</th>
+                                        <th>المطعم</th>
+                                        <th>المنتج</th>
+                                        <th>السعر</th>
+                                        <th>الخصم</th>
+                                        <th>تاريخ البداية</th>
+                                        <th>تاريخ النهاية</th>
+                                        <th>الحالة</th>
+                                        <th>العمليات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var offer in Model)
+                                    {
+                                        <tr data-offer-id="@offer.Id" data-restaurant-id="@offer.RestaurantId" data-name="@offer.Name" data-restaurant="@offer.Restaurant?.Name" data-state="@offer.State" data-price="@offer.Price" data-start-date="@offer.StartDate?.ToString("yyyy-MM-dd")" data-end-date="@offer.EndDate?.ToString("yyyy-MM-dd")">
+                                            <td>
+                                                <div class="offer-icon-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                                                    <i class="bi bi-tag text-muted"></i>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <strong>@offer.Name</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@offer.Restaurant?.Name</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@offer.Product?.Name</span>
+                                            </td>
+                                            <td>
+                                                <strong class="text-success">@((decimal)(offer.Price ?? 0))</strong>
+                                                @if (offer.DeleverCost > 0)
+                                                {
+                                                    <br><small class="text-muted">+ @((decimal)(offer.DeleverCost ?? 0)) توصيل</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (offer.Discount > 0)
+                                                {
+                                                    <span class="badge bg-danger">@offer.Discount% خصم</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">لا يوجد</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (offer.StartDate.HasValue)
+                                                {
+                                                    <small>@offer.StartDate.Value.ToString("dd/MM/yyyy")</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">غير محدد</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (offer.EndDate.HasValue)
+                                                {
+                                                    <small>@offer.EndDate.Value.ToString("dd/MM/yyyy")</small>
+                                                    @if (offer.EndDate < DateTime.Now)
+                                                    {
+                                                        <br><span class="badge bg-warning">منتهي</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">غير محدد</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @switch (offer.State?.ToLower())
+                                                {
+                                                    case "active":
+                                                        <span class="badge bg-success">نشط</span>
+                                                        break;
+                                                    case "inactive":
+                                                        <span class="badge bg-secondary">غير نشط</span>
+                                                        break;
+                                                    case "expired":
+                                                        <span class="badge bg-danger">منتهي الصلاحية</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-light text-dark">@(offer.State ?? "غير محدد")</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@offer.Id" class="btn btn-sm btn-outline-info" title="عرض التفاصيل">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@offer.Id" class="btn btn-sm btn-outline-warning" title="تعديل">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-id="@offer.Id" class="btn btn-sm btn-outline-danger" title="حذف">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Card View -->
+                    <div id="cardViewContainer" style="display: none;">
+                        <div class="row">
+                            @foreach (var offer in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-4 offer-card" data-offer-id="@offer.Id" data-restaurant-id="@offer.RestaurantId" data-name="@offer.Name" data-restaurant="@offer.Restaurant?.Name" data-state="@offer.State" data-price="@offer.Price" data-start-date="@offer.StartDate?.ToString("yyyy-MM-dd")" data-end-date="@offer.EndDate?.ToString("yyyy-MM-dd")">
+                                    <div class="card h-100 shadow-sm card-hover">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="me-3">
+                                                    <div class="offer-icon-placeholder rounded-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                                                        <i class="bi bi-tag text-muted" style="font-size: 1.5rem;"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1">@offer.Name</h6>
+                                                    <p class="card-text text-muted small mb-2">@offer.Restaurant?.Name</p>
+                                                    <div class="d-flex flex-wrap gap-1 mb-2">
+                                                        @switch (offer.State?.ToLower())
+                                                        {
+                                                            case "active":
+                                                                <span class="badge bg-success">نشط</span>
+                                                                break;
+                                                            case "inactive":
+                                                                <span class="badge bg-secondary">غير نشط</span>
+                                                                break;
+                                                            case "expired":
+                                                                <span class="badge bg-danger">منتهي الصلاحية</span>
+                                                                break;
+                                                            default:
+                                                                <span class="badge bg-light text-dark">@(offer.State ?? "غير محدد")</span>
+                                                                break;
+                                                        }
+                                                        @if (offer.Discount > 0)
+                                                        {
+                                                            <span class="badge bg-danger">@offer.Discount% خصم</span>
+                                                        }
+                                                        @if (offer.EndDate.HasValue && offer.EndDate < DateTime.Now)
+                                                        {
+                                                            <span class="badge bg-warning">منتهي</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row text-center mb-3">
+                                                <div class="col-4">
+                                                    <div class="border-end">
+                                                        <div class="text-success fw-bold">@offer.Price</div>
+                                                        <small class="text-muted">السعر</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="border-end">
+                                                        <div class="fw-bold">@(offer.Units ?? 0)</div>
+                                                        <small class="text-muted">الوحدات</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="fw-bold">@offer.Product?.Name</div>
+                                                    <small class="text-muted">المنتج</small>
+                                                </div>
+                                            </div>
+
+                                            @if (offer.StartDate.HasValue || offer.EndDate.HasValue)
+                                            {
+                                                <div class="mb-3">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-calendar-range me-1"></i>
+                                                        @if (offer.StartDate.HasValue)
+                                                        {
+                                                            @offer.StartDate.Value.ToString("dd/MM/yyyy")
+                                                        }
+                                                        @if (offer.StartDate.HasValue && offer.EndDate.HasValue)
+                                                        {
+                                                            <span> - </span>
+                                                        }
+                                                        @if (offer.EndDate.HasValue)
+                                                        {
+                                                            @offer.EndDate.Value.ToString("dd/MM/yyyy")
+                                                        }
+                                                    </small>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <div class="btn-group w-100" role="group">
+                                                <a asp-action="Details" asp-route-id="@offer.Id" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye me-1"></i>عرض
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@offer.Id" class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil me-1"></i>تعديل
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@offer.Id" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash me-1"></i>حذف
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <style>
+        .offer-icon, .offer-icon-large {
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .offer-icon:hover, .offer-icon-large:hover {
+            border-color: #0d6efd;
+            transform: scale(1.05);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem !important;
+            margin-left: 2px;
+        }
+
+        .alert {
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            border-left-color: #198754;
+        }
+
+        .alert-danger {
+            border-left-color: #dc3545;
+        }
+    </style>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filterOffers();
+        });
+
+        // Restaurant filter
+        document.getElementById('restaurantFilter').addEventListener('change', function() {
+            filterOffers();
+        });
+
+        // State filter
+        document.getElementById('stateFilter').addEventListener('change', function() {
+            filterOffers();
+        });
+
+        // Filter offers based on search and filters
+        function filterOffers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const restaurantFilter = document.getElementById('restaurantFilter').value;
+            const stateFilter = document.getElementById('stateFilter').value;
+
+            const tableRows = document.querySelectorAll('#tableViewContainer tbody tr');
+            const cardItems = document.querySelectorAll('.offer-card');
+
+            let visibleCount = 0;
+
+            // Filter table rows
+            tableRows.forEach(row => {
+                const name = row.dataset.name?.toLowerCase() || '';
+                const restaurant = row.dataset.restaurant?.toLowerCase() || '';
+                const restaurantId = row.dataset.restaurantId || '';
+                const state = row.dataset.state?.toLowerCase() || '';
+
+                const matchesSearch = name.includes(searchTerm) || restaurant.includes(searchTerm);
+                const matchesRestaurant = !restaurantFilter || restaurantId === restaurantFilter;
+                const matchesState = !stateFilter || state === stateFilter;
+
+                if (matchesSearch && matchesRestaurant && matchesState) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Filter card items
+            cardItems.forEach(card => {
+                const name = card.dataset.name?.toLowerCase() || '';
+                const restaurant = card.dataset.restaurant?.toLowerCase() || '';
+                const restaurantId = card.dataset.restaurantId || '';
+                const state = card.dataset.state?.toLowerCase() || '';
+
+                const matchesSearch = name.includes(searchTerm) || restaurant.includes(searchTerm);
+                const matchesRestaurant = !restaurantFilter || restaurantId === restaurantFilter;
+                const matchesState = !stateFilter || state === stateFilter;
+
+                if (matchesSearch && matchesRestaurant && matchesState) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update visible count
+            document.getElementById('visibleCount').textContent = visibleCount;
+        }
+
+        // Toggle between table and card view
+        function toggleView() {
+            const tableView = document.getElementById('tableViewContainer');
+            const cardView = document.getElementById('cardViewContainer');
+            const isTableView = document.getElementById('tableView').checked;
+
+            if (isTableView) {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'block';
+            }
+        }
+
+        // Sort offers
+        function sortOffers(sortBy, direction) {
+            const tableBody = document.querySelector('#tableViewContainer tbody');
+            const cardContainer = document.querySelector('#cardViewContainer .row');
+            const tableRows = Array.from(tableBody.querySelectorAll('tr'));
+            const cardItems = Array.from(cardContainer.querySelectorAll('.offer-card'));
+
+            // Sort table rows
+            tableRows.sort((a, b) => {
+                let aValue, bValue;
+
+                switch(sortBy) {
+                    case 'name':
+                        aValue = a.dataset.name || '';
+                        bValue = b.dataset.name || '';
+                        break;
+                    case 'price':
+                        aValue = parseFloat(a.dataset.price) || 0;
+                        bValue = parseFloat(b.dataset.price) || 0;
+                        break;
+                    case 'date':
+                        aValue = new Date(a.dataset.startDate || '1900-01-01');
+                        bValue = new Date(b.dataset.startDate || '1900-01-01');
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (typeof aValue === 'string') {
+                    return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                } else {
+                    return direction === 'asc' ? aValue - bValue : bValue - aValue;
+                }
+            });
+
+            // Sort card items
+            cardItems.sort((a, b) => {
+                let aValue, bValue;
+
+                switch(sortBy) {
+                    case 'name':
+                        aValue = a.dataset.name || '';
+                        bValue = b.dataset.name || '';
+                        break;
+                    case 'price':
+                        aValue = parseFloat(a.dataset.price) || 0;
+                        bValue = parseFloat(b.dataset.price) || 0;
+                        break;
+                    case 'date':
+                        aValue = new Date(a.dataset.startDate || '1900-01-01');
+                        bValue = new Date(b.dataset.startDate || '1900-01-01');
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (typeof aValue === 'string') {
+                    return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                } else {
+                    return direction === 'asc' ? aValue - bValue : bValue - aValue;
+                }
+            });
+
+            // Re-append sorted elements
+            tableRows.forEach(row => tableBody.appendChild(row));
+            cardItems.forEach(card => cardContainer.appendChild(card));
+        }
+
+        // Show default icon on error
+        function showDefaultOfferIcon(img) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'offer-icon-placeholder rounded-circle d-flex align-items-center justify-content-center';
+            placeholder.style.cssText = img.style.cssText;
+            placeholder.innerHTML = '<i class="bi bi-tag text-muted"></i>';
+            img.parentNode.replaceChild(placeholder, img);
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+}

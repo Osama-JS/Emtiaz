@@ -1031,4 +1031,305 @@ $(".submitreset").on("submit", function (event) {
         }
     });
 
-});
+}
+
+// Enhanced Category Management Functions
+// =====================================
+
+// Filter categories in real-time
+function filterCategoriesLive() {
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+
+    if (!searchInput) return;
+
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const sortValue = sortSelect ? sortSelect.value : 'name-asc';
+
+    // Get all category items (both table rows and cards)
+    const tableRows = document.querySelectorAll('#categoriesTable tbody tr');
+    const cardElements = document.querySelectorAll('.category-card');
+
+    let visibleCount = 0;
+
+    // Filter table rows
+    tableRows.forEach(row => {
+        const name = row.getAttribute('data-name')?.toLowerCase() || '';
+        const enname = row.getAttribute('data-enname')?.toLowerCase() || '';
+        const isVisible = name.includes(searchTerm) || enname.includes(searchTerm) || searchTerm === '';
+
+        row.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
+    });
+
+    // Filter card elements
+    cardElements.forEach(card => {
+        const name = card.getAttribute('data-name')?.toLowerCase() || '';
+        const enname = card.getAttribute('data-enname')?.toLowerCase() || '';
+        const isVisible = name.includes(searchTerm) || enname.includes(searchTerm) || searchTerm === '';
+
+        card.style.display = isVisible ? '' : 'none';
+    });
+
+    // Show/hide no results message
+    const noResults = document.getElementById('noResults');
+    if (noResults) {
+        if (visibleCount === 0 && searchTerm !== '') {
+            noResults.style.display = 'block';
+            const tableView = document.getElementById('tableView-content');
+            const cardView = document.getElementById('cardView-content');
+            if (tableView) tableView.style.display = 'none';
+            if (cardView) cardView.style.display = 'none';
+        } else {
+            noResults.style.display = 'none';
+            // Restore current view
+            const currentView = document.querySelector('input[name="viewMode"]:checked')?.id || 'tableView';
+            toggleCategoryView(currentView === 'tableView' ? 'table' : 'card');
+        }
+    }
+}
+
+// Toggle between table and card view for categories
+function toggleCategoryView(viewType) {
+    const tableView = document.getElementById('tableView-content');
+    const cardView = document.getElementById('cardView-content');
+
+    if (!tableView || !cardView) return;
+
+    if (viewType === 'table') {
+        tableView.style.display = 'block';
+        cardView.style.display = 'none';
+    } else {
+        tableView.style.display = 'none';
+        cardView.style.display = 'block';
+    }
+}
+
+// Sort categories
+function sortCategoriesData() {
+    const sortSelect = document.getElementById('sortSelect');
+    if (!sortSelect) return;
+
+    const sortValue = sortSelect.value;
+    const [field, direction] = sortValue.split('-');
+
+    // Get all category data
+    const tableRows = Array.from(document.querySelectorAll('#categoriesTable tbody tr'));
+    const cardElements = Array.from(document.querySelectorAll('.category-card'));
+
+    // Create combined array for sorting
+    const categories = tableRows.map((row, index) => ({
+        name: row.getAttribute('data-name') || '',
+        enname: row.getAttribute('data-enname') || '',
+        tableRow: row,
+        cardElement: cardElements[index]
+    }));
+
+    // Sort the array
+    categories.sort((a, b) => {
+        let aValue = field === 'name' ? a.name : a.enname;
+        let bValue = field === 'name' ? b.name : b.enname;
+
+        if (direction === 'asc') {
+            return aValue.localeCompare(bValue);
+        } else {
+            return bValue.localeCompare(aValue);
+        }
+    });
+
+    // Reorder elements in DOM
+    const tableBody = document.querySelector('#categoriesTable tbody');
+    const cardContainer = document.getElementById('cardView-content');
+
+    if (tableBody) {
+        categories.forEach(category => {
+            if (category.tableRow) {
+                tableBody.appendChild(category.tableRow);
+            }
+        });
+    }
+
+    if (cardContainer) {
+        categories.forEach(category => {
+            if (category.cardElement) {
+                cardContainer.appendChild(category.cardElement);
+            }
+        });
+    }
+}
+
+// Enhanced form validation
+function validateCategoryForm(formSelector) {
+    const form = document.querySelector(formSelector);
+    if (!form) return true;
+
+    let isValid = true;
+    const requiredFields = form.querySelectorAll('input[required]');
+
+    requiredFields.forEach(field => {
+        const value = field.value.trim();
+        const fieldName = field.getAttribute('name');
+
+        // Remove previous validation classes
+        field.classList.remove('is-invalid', 'is-valid');
+
+        if (!value) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            // Additional validation based on field type
+            if (fieldName === 'IconLink' && value) {
+                // Validate URL format
+                const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+                if (!urlPattern.test(value)) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            } else {
+                field.classList.add('is-valid');
+            }
+        }
+    });
+
+    return isValid;
+}
+
+// Auto-save draft functionality
+function enableAutoSave(formSelector) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    const formId = form.getAttribute('id') || 'categoryForm';
+    const inputs = form.querySelectorAll('input[type="text"], textarea');
+
+    // Load saved draft
+    inputs.forEach(input => {
+        const savedValue = localStorage.getItem(`${formId}_${input.name}`);
+        if (savedValue && !input.value) {
+            input.value = savedValue;
+        }
+    });
+
+    // Save on input
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            localStorage.setItem(`${formId}_${input.name}`, this.value);
+        });
+    });
+
+    // Clear draft on successful submit
+    form.addEventListener('submit', function() {
+        inputs.forEach(input => {
+            localStorage.removeItem(`${formId}_${input.name}`);
+        });
+    });
+}
+
+// Enhanced image preview with validation
+function previewImageWithValidation(input, previewElementId, maxSize = 5 * 1024 * 1024) {
+    const preview = document.getElementById(previewElementId);
+    if (!preview || !input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+
+    // Validate file size
+    if (file.size > maxSize) {
+        Swal.fire({
+            icon: 'error',
+            title: 'حجم الملف كبير جداً',
+            text: `حجم الملف يجب أن يكون أقل من ${maxSize / (1024 * 1024)} ميجابايت`
+        });
+        input.value = '';
+        return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'نوع الملف غير مدعوم',
+            text: 'يرجى اختيار صورة بصيغة JPG, PNG, GIF, WebP, أو SVG'
+        });
+        input.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Bulk operations for categories
+function initializeBulkOperations() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    const bulkActions = document.getElementById('bulkActions');
+
+    if (!selectAllCheckbox || !itemCheckboxes.length) return;
+
+    // Select all functionality
+    selectAllCheckbox.addEventListener('change', function() {
+        itemCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        toggleBulkActions();
+    });
+
+    // Individual checkbox change
+    itemCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            selectAllCheckbox.checked = checkedCount === itemCheckboxes.length;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < itemCheckboxes.length;
+            toggleBulkActions();
+        });
+    });
+
+    function toggleBulkActions() {
+        const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+        if (bulkActions) {
+            bulkActions.style.display = checkedCount > 0 ? 'block' : 'none';
+        }
+    }
+}
+
+// Initialize all category management features
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterCategoriesLive);
+    }
+
+    // Initialize sort functionality
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', sortCategoriesData);
+    }
+
+    // Initialize view toggle
+    const viewRadios = document.querySelectorAll('input[name="viewMode"]');
+    viewRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const viewType = this.id === 'tableView' ? 'table' : 'card';
+            toggleCategoryView(viewType);
+        });
+    });
+
+    // Initialize auto-save for forms
+    enableAutoSave('.needs-validation');
+
+    // Initialize bulk operations
+    initializeBulkOperations();
+
+    // Add smooth animations
+    const cards = document.querySelectorAll('.card, .category-card');
+    cards.forEach(card => {
+        card.style.transition = 'all 0.3s ease-in-out';
+    });
+}););

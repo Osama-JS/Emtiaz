@@ -1,0 +1,317 @@
+@model Emtias.Models.Scaffolded.Offer
+@using Emtias.Models.Scaffolded
+
+@{
+    ViewData["Title"] = "تفاصيل العرض";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>تفاصيل العرض</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">العروض</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row">
+        <!-- Main Information Card -->
+        <div class="col-lg-12">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="me-4">
+                                    <div class="offer-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow"
+                                        style="width: 100px; height: 100px; background-color: #e9ecef; border: 2px dashed #dee2e6;">
+                                        <i class="bi bi-tag text-muted" style="font-size: 2.5rem;"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h3 class="mb-2">@Model.Name</h3>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @switch (Model.State?.ToLower())
+                                        {
+                                            case "active":
+                                                <span class="badge bg-success">نشط</span>
+                                                break;
+                                            case "inactive":
+                                                <span class="badge bg-warning">غير نشط</span>
+                                                break;
+                                            case "expired":
+                                                <span class="badge bg-danger">منتهي الصلاحية</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-light text-dark">@(Model.State ?? "غير محدد")</span>
+                                                break;
+                                        }
+                                        @if (Model.Discount > 0)
+                                        {
+                                            <span class="badge bg-danger">خصم @Model.Discount%</span>
+                                        }
+                                        @if (Model.EndDate < DateTime.Now)
+                                        {
+                                            <span class="badge bg-secondary">منتهي</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Information -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">معلومات أساسية</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>اسم العرض:</strong></td>
+                                            <td>@Model.Name</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>المطعم:</strong></td>
+                                            <td>
+                                                @if (Model.Restaurant != null)
+                                                {
+                                                    <a href="/Restaurant/Details/@Model.Restaurant.Id"
+                                                        class="text-decoration-none">
+                                                        <span class="badge bg-primary">@Model.Restaurant.Name</span>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">غير محدد</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        @if (Model.Product != null)
+                                        {
+                                            <tr>
+                                                <td><strong>المنتج:</strong></td>
+                                                <td>
+                                                    <a href="/Product/Details/@Model.Product.Id"
+                                                        class="text-decoration-none">
+                                                        <span class="badge bg-secondary">@Model.Product.Name</span>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td><strong>الحالة:</strong></td>
+                                            <td>@(Model.State ?? "غير محدد")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">معلومات السعر والتوقيت</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>السعر:</strong></td>
+                                            <td><span class="text-success fw-bold">@((decimal)(Model.Price ?? 0))
+                                                    ر.س</span></td>
+                                        </tr>
+                                        @if (Model.DeleverCost > 0)
+                                        {
+                                            <tr>
+                                                <td><strong>تكلفة التوصيل:</strong></td>
+                                                <td><span class="text-info">@((decimal)(Model.DeleverCost ?? 0)) ر.س</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if (Model.Discount > 0)
+                                        {
+                                            <tr>
+                                                <td><strong>نسبة الخصم:</strong></td>
+                                                <td><span class="text-danger fw-bold">@Model.Discount%</span></td>
+                                            </tr>
+                                        }
+                                        @if (Model.Units.HasValue && Model.Units > 0)
+                                        {
+                                            <tr>
+                                                <td><strong>الوحدات المتاحة:</strong></td>
+                                                <td><span class="badge bg-primary">@Model.Units</span></td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+
+
+                            @if (Model.StartDate.HasValue || Model.EndDate.HasValue)
+                            {
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-calendar-range me-2"></i>فترة العرض</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            @if (Model.StartDate.HasValue)
+                                            {
+                                                <div class="col-md-6">
+                                                    <strong class="text-muted">تاريخ البداية:</strong>
+                                                    <br>
+                                                    <span class="text-success">
+                                                        <i class="bi bi-calendar-check me-1"></i>
+                                                        @Model.StartDate.Value.ToString("dd/MM/yyyy - HH:mm")
+                                                    </span>
+                                                </div>
+                                            }
+                                            @if (Model.EndDate.HasValue)
+                                            {
+                                                <div class="col-md-6">
+                                                    <strong class="text-muted">تاريخ النهاية:</strong>
+                                                    <br>
+                                                    <span
+                                                        class="@(Model.EndDate < DateTime.Now ? "text-danger" : "text-warning")">
+                                                        <i class="bi bi-calendar-x me-1"></i>
+                                                        @Model.EndDate.Value.ToString("dd/MM/yyyy - HH:mm")
+                                                        @if (Model.EndDate < DateTime.Now)
+                                                        {
+                                                            <small class="badge bg-danger ms-2">منتهي</small>
+                                                        }
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        @if (Model.StartDate.HasValue && Model.EndDate.HasValue)
+                                        {
+                                            <hr>
+                                            <div class="text-center">
+                                                @{
+                                                    var duration = Model.EndDate.Value - Model.StartDate.Value;
+                                                    var totalDays = (int)duration.TotalDays;
+                                                    var totalHours = (int)duration.TotalHours;
+                                                }
+                                                <strong class="text-muted">مدة العرض:</strong>
+                                                <span class="badge bg-info fs-6">
+                                                    @if (totalDays > 0)
+                                                    {
+                                                        @totalDays <text> يوم</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        @totalHours <text> ساعة</text>
+                                                    }
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Additional Information -->
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        
+                        <div class="card-body">
+                        <h6 class="card-title">الإرتباطات</h6>
+                            <div class="row">
+                                
+                                <div class="col-md-6">
+                                        @if (Model.Restaurant != null)
+                                        {
+                                            <dt class=" text-muted">المطعم</dt>
+                                            <dd class=""><code>@Model.Restaurant?.Name</code></dd>
+                                        }
+
+                                     
+                                </div>
+                                <div class="col-md-6">
+                                    
+
+                                        @if (Model.Product != null)
+                                        {
+                                            <dt class=" text-muted"> المنتج</dt>
+                                            <dd class=""><code>@Model.Product?.Name</code></dd>
+                                        }
+                                  
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Actions Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">الإجراءات</h6>
+                            <div class="d-grid gap-2">
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                    <i class="bi bi-pencil me-1"></i>
+                                    تعديل العرض
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i>
+                                    حذف العرض
+                                </a>
+                                <hr>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة للقائمة
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <style>
+        .offer-icon-container img {
+            border: 3px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .offer-icon-container img:hover {
+            border-color: #0d6efd;
+            transform: scale(1.05);
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .badge.fs-6 {
+            font-size: 0.875rem !important;
+        }
+
+        code {
+            color: #6f42c1;
+            background-color: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+
+    <script>
+        // Show default icon on error
+        function showDefaultOfferIcon(img) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'offer-icon-placeholder rounded-3 d-flex align-items-center justify-content-center shadow-sm';
+            placeholder.style.cssText = 'width: 150px; height: 150px; background-color: #f8f9fa; border: 2px solid #dee2e6; margin: 0 auto;';
+            placeholder.innerHTML = '<i class="bi bi-tag text-muted" style="font-size: 4rem;"></i>';
+            img.parentNode.replaceChild(placeholder, img);
+        }
+    </script>
+}

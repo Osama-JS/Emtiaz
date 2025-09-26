@@ -1,9 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Controllers",
+    "\\Models\\Scaffolded",
     "\\Views",
+    "\\Views\\Catfory",
     "\\Views\\Home"
   ],
-  "SelectedNode": "\\Views\\Home\\Index.cshtml",
+  "SelectedNode": "\\Views\\Catfory\\Index.cshtml",
   "PreviewInSolutionExplorer": false
 }

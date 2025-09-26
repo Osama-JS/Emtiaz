@@ -1,0 +1,316 @@
+@model Emtias.Models.Scaffolded.Product
+
+@{
+    ViewData["Title"] = "حذف المنتج";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>حذف المنتج</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">الرئيسية</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">المنتجات</a></li>
+            <li class="breadcrumb-item active">حذف</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Warning Alert -->
+
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>تحذير!</strong> هذا الإجراء لا يمكن التراجع عنه. سيتم حذف المنتج وجميع البيانات المرتبطة به
+                نهائياً.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card">
+            <div class="card-header bg-danger mb-3">
+                        <h5 class="card-title mb-0 text-white">
+                            <i class="bi bi-trash me-2"></i>
+                            تأكيد حذف المنتج
+                        </h5>
+                    </div>
+                <div class="card-body">
+                    
+
+                    <!-- Product Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            @if (!string.IsNullOrEmpty(Model.IconLink))
+                            {
+                                <img src="@Model.IconLink" alt="@Model.Name"
+                                    class="product-icon-large rounded-3 shadow mb-3"
+                                    style="width: 120px; height: 120px; object-fit: cover;" onerror="showDefaultIcon(this)">
+                            }
+                            else
+                            {
+                                <div class="product-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow mb-3"
+                                    style="width: 120px; height: 120px; background-color: #e9ecef; border: 2px dashed #dee2e6; margin: 0 auto;">
+                                    <i class="bi bi-box text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            <h4 class="text-danger">@Model.Name</h4>
+                            @if (!string.IsNullOrEmpty(Model.EnName))
+                            {
+                                <p class="text-muted">@Model.EnName</p>
+                            }
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">معلومات المنتج</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>الاسم العربي:</strong></td>
+                                            <td>@Model.Name</td>
+                                        </tr>
+                                        @if (!string.IsNullOrEmpty(Model.EnName))
+                                        {
+                                            <tr>
+                                                <td><strong>الاسم الإنجليزي:</strong></td>
+                                                <td>@Model.EnName</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td><strong>المطعم:</strong></td>
+                                            <td>
+                                                @if (Model.Restaurant != null)
+                                                {
+                                                    <span class="badge bg-primary">@Model.Restaurant.Name</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">غير محدد</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>الحالة:</strong></td>
+                                            <td>
+                                                @switch (Model.State?.ToLower())
+                                                {
+                                                    case "new":
+                                                        <span class="badge bg-info">جديد</span>
+                                                        break;
+                                                    case "active":
+                                                        <span class="badge bg-success">نشط</span>
+                                                        break;
+                                                    case "inactive":
+                                                        <span class="badge bg-warning">غير نشط</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@Model.State</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">معلومات النظام</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>معرف المنتج:</strong></td>
+                                            <td><code>@Model.Id</code></td>
+                                        </tr>
+                                        @if (Model.CreateAt.HasValue)
+                                        {
+                                            <tr>
+                                                <td><strong>تاريخ الإنشاء:</strong></td>
+                                                <td>@Model.CreateAt.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td><strong>الحالة العامة:</strong></td>
+                                            <td>
+                                                @if (Model.Deleted == true)
+                                                {
+                                                    <span class="badge bg-danger">محذوف</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">نشط</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impact Assessment -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="py-2">
+                                <h6 class="text-warning mb-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                تأثير الحذف على البيانات المرتبطة:
+                            </h6>
+
+                                <div class="row ">
+                                    <div class="col-md-4">
+                                        <div class="card border-warning">
+                                            <div class="card-body text-center py-3">
+                                                <i class="bi bi-percent text-warning" style="font-size: 2rem;"></i>
+                                                <h6 class="mt-2 mb-1">العروض</h6>
+                                                <span class="badge bg-warning">@(Model.Offers?.Count ?? 0)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="card border-warning">
+                                            <div class="card-body text-center py-3">
+                                                <i class="bi bi-cart text-warning" style="font-size: 2rem;"></i>
+                                                <h6 class="mt-2 mb-1">في السلة</h6>
+                                                <span class="badge bg-warning">@(Model.Carts?.Count ?? 0)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="card border-warning">
+                                            <div class="card-body text-center py-3">
+                                                <i class="bi bi-bag text-warning" style="font-size: 2rem;"></i>
+                                                <h6 class="mt-2 mb-1">الطلبات</h6>
+                                                <span class="badge bg-warning">@(Model.OrderItems?.Count ?? 0)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                @if ((Model.Offers?.Any() == true) || (Model.Carts?.Any() == true) ||
+                                                                (Model.OrderItems?.Any() == true))
+                                {
+                                    <hr>
+                                    <div class="text-center">
+                                        <p class="mb-0">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            <strong>ملاحظة:</strong> سيتم حذف جميع البيانات المرتبطة بهذا المنتج نهائياً.
+                                        </p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Form -->
+                    <form asp-action="Delete" method="post" id="deleteForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a asp-action="Index" class="btn btn-secondary me-2">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة للقائمة
+                                </a>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض التفاصيل
+                                </a>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                    <i class="bi bi-trash me-1"></i>
+                                    تأكيد الحذف
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                        <div class="product-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center shadow mb-3" style="width: 120px; height: 120px; background-color: #e9ecef; border: 2px dashed #dee2e6; margin: 0 auto;">
+                            <i class="bi bi-box text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                    `;
+        }
+
+        // Confirm delete with SweetAlert
+        function confirmDelete() {
+            
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                 html: `
+                    <div class="text-start">
+                        <p class="mb-3">هذا الإجراء لا يمكن التراجع عنه. سيتم حذف المنتج "<strong>@Model.Name</strong>" نهائياً!</p>
+                        <div class="alert alert-warning">
+                            سيتأثر التالي: 
+                            <ul class="mb-0 mt-2">
+                                <li>@(Model.Offers?.Count ?? 0) منتج</li>
+                                <li>@(Model.Carts?.Count ?? 0) عنصر في السلة</li>
+                                <li>@(Model.OrderItems?.Count ?? 0) طلب</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'نعم، احذف المنتج',
+                cancelButtonText: 'إلغاء',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                     // Show loading
+                    Swal.fire({
+                        title: 'جاري الحذف...',
+                        text: 'يرجى الانتظار',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit the form
+                    setTimeout(() => {
+                        document.getElementById('deleteForm').submit();
+                    }, 1000);
+                    
+                }
+            });
+        }
+
+
+
+        // Add hover effect to delete button
+        const deleteButton = document.querySelector('button[onclick="confirmDelete()"]');
+        if (deleteButton) {
+            deleteButton.addEventListener('mouseenter', function () {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s ease-in-out';
+                this.style.boxShadow = '0 4px 8px rgba(220, 53, 69, 0.3)';
+            });
+
+            deleteButton.addEventListener('mouseleave', function () {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+        }
+
+      
+    </script>
+}

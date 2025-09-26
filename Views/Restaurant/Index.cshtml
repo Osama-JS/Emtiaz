@@ -1,0 +1,438 @@
+@model IEnumerable<Emtias.Models.Scaffolded.Restaurant>
+
+@{
+    ViewData["Title"] = "إدارة المطاعم";
+}
+
+<!-- Page Title -->
+<div class="pagetitle">
+    <h1>إدارة المطاعم</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+            <li class="breadcrumb-item active">المطاعم</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Success Message -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Error Message -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">قائمة المطاعم</h5>
+                        <a class="btn btn-primary" asp-action="Create">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            إضافة مطعم جديد
+                        </a>
+                    </div>
+
+                    <!-- Search and Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="search-form">
+                                <input type="text" class="form-control" id="searchInput" placeholder="البحث في المطاعم..." onkeyup="filterRestaurants()">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="categoryFilter" onchange="filterRestaurants()">
+                                <option value="">جميع الأقسام</option>
+                                @foreach (var category in Model.Where(r => r.Catgory != null).Select(r => r.Catgory).Distinct())
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="viewMode" id="tableView" value="table" checked onchange="toggleView()">
+                                <label class="btn btn-outline-secondary" for="tableView">
+                                    <i class="bi bi-table"></i> جدول
+                                </label>
+                                <input type="radio" class="btn-check" name="viewMode" id="cardView" value="card" onchange="toggleView()">
+                                <label class="btn btn-outline-secondary" for="cardView">
+                                    <i class="bi bi-grid-3x3-gap"></i> كروت
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sorting Controls -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortRestaurants('name', 'asc')">
+                                    <i class="bi bi-sort-alpha-down"></i> الاسم تصاعدي
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortRestaurants('name', 'desc')">
+                                    <i class="bi bi-sort-alpha-up"></i> الاسم تنازلي
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortRestaurants('category', 'asc')">
+                                    <i class="bi bi-sort-down"></i> القسم
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="text-muted">
+                                <span id="restaurantCount">@Model.Count()</span> مطعم
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Table View -->
+                    <div id="tableViewContainer" class="table-responsive">
+                        <table class="table table-hover align-middle" id="restaurantsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الأيقونة</th>
+                                    <th>الاسم العربي</th>
+                                    <th>الاسم الإنجليزي</th>
+                                    <th>القسم</th>
+                                    <th>العنوان</th>
+                                    <th>التفاصيل</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var restaurant in Model)
+                                {
+                                    <tr data-restaurant-id="@restaurant.Id" data-category-id="@restaurant.CatgoryId" data-name="@restaurant.Name" data-en-name="@restaurant.EnName" data-category="@restaurant.Catgory?.Name">
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(restaurant.IconLink))
+                                            {
+                                                <img src="@restaurant.IconLink" alt="@restaurant.Name" class="restaurant-icon rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" onerror="showDefaultRestaurantIcon(this)">
+                                            }
+                                            else
+                                            {
+                                                <div class="restaurant-icon-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #e9ecef; border: 1px solid #dee2e6;">
+                                                    <i class="bi bi-shop text-muted"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <strong>@restaurant.Name</strong>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">@restaurant.EnName</span>
+                                        </td>
+                                        <td>
+                                            @if (restaurant.Catgory != null)
+                                            {
+                                                <span class="badge bg-primary">@restaurant.Catgory.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">غير محدد</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@restaurant.Address</small>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(restaurant.Details))
+                                            {
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;" title="@restaurant.Details">@restaurant.Details</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">لا توجد تفاصيل</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (restaurant.Deleted)
+                                            {
+                                                <span class="badge bg-danger">محذوف</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">نشط</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@restaurant.Id" class="btn btn-outline-info btn-sm" title="عرض التفاصيل">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@restaurant.Id" class="btn btn-outline-warning btn-sm" title="تعديل">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@restaurant.Id" class="btn btn-outline-danger btn-sm" title="حذف">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Card View -->
+                    <div id="cardViewContainer" class="row" style="display: none;">
+                        @foreach (var restaurant in Model)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4 restaurant-card" data-restaurant-id="@restaurant.Id" data-category-id="@restaurant.CatgoryId" data-name="@restaurant.Name" data-en-name="@restaurant.EnName" data-category="@restaurant.Catgory?.Name">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="me-3">
+                                                @if (!string.IsNullOrEmpty(restaurant.IconLink))
+                                                {
+                                                    <img src="@restaurant.IconLink" alt="@restaurant.Name" class="restaurant-icon-large rounded-3" style="width: 60px; height: 60px; object-fit: cover;" onerror="showDefaultRestaurantIcon(this)">
+                                                }
+                                                else
+                                                {
+                                                    <div class="restaurant-icon-placeholder-large rounded-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: #e9ecef; border: 2px dashed #dee2e6;">
+                                                        <i class="bi bi-shop text-muted" style="font-size: 1.5rem;"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="card-title mb-1">@restaurant.Name</h6>
+                                                <p class="card-text text-muted small mb-2">@restaurant.EnName</p>
+                                                @if (restaurant.Catgory != null)
+                                                {
+                                                    <span class="badge bg-primary mb-2">@restaurant.Catgory.Name</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary mb-2">غير محدد</span>
+                                                }
+                                            </div>
+                                            <div>
+                                                @if (restaurant.Deleted)
+                                                {
+                                                    <span class="badge bg-danger">محذوف</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">نشط</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(restaurant.Address))
+                                        {
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-geo-alt me-1"></i>
+                                                    @restaurant.Address
+                                                </small>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(restaurant.Details))
+                                        {
+                                            <p class="card-text small text-muted mb-3">
+                                                @(restaurant.Details.Length > 100 ? restaurant.Details.Substring(0, 100) + "..." : restaurant.Details)
+                                            </p>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(restaurant.Lat) && !string.IsNullOrEmpty(restaurant.Lng))
+                                        {
+                                            <div class="mb-3">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-pin-map me-1"></i>
+                                                    الإحداثيات: @restaurant.Lat, @restaurant.Lng
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="btn-group w-100" role="group">
+                                            <a asp-action="Details" asp-route-id="@restaurant.Id" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye me-1"></i>
+                                                تفاصيل
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@restaurant.Id" class="btn btn-outline-warning btn-sm">
+                                                <i class="bi bi-pencil me-1"></i>
+                                                تعديل
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@restaurant.Id" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash me-1"></i>
+                                                حذف
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Show default icon when image fails to load
+        function showDefaultRestaurantIcon(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="restaurant-icon-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: ${img.style.width}; height: ${img.style.height}; background-color: #e9ecef; border: 1px solid #dee2e6;">
+                    <i class="bi bi-shop text-muted"></i>
+                </div>
+            `;
+        }
+
+        // Toggle between table and card view
+        function toggleView() {
+            const tableView = document.getElementById('tableViewContainer');
+            const cardView = document.getElementById('cardViewContainer');
+            const selectedView = document.querySelector('input[name="viewMode"]:checked').value;
+
+            if (selectedView === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'flex';
+            }
+        }
+
+        // Filter restaurants based on search and category
+        function filterRestaurants() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            // Filter table rows
+            const tableRows = document.querySelectorAll('#restaurantsTable tbody tr');
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const name = row.dataset.name?.toLowerCase() || '';
+                const enName = row.dataset.enName?.toLowerCase() || '';
+                const category = row.dataset.category?.toLowerCase() || '';
+                const categoryId = row.dataset.categoryId || '';
+
+                const matchesSearch = name.includes(searchTerm) || enName.includes(searchTerm) || category.includes(searchTerm);
+                const matchesCategory = !categoryFilter || categoryId === categoryFilter;
+
+                if (matchesSearch && matchesCategory) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Filter cards
+            const cards = document.querySelectorAll('.restaurant-card');
+            cards.forEach(card => {
+                const name = card.dataset.name?.toLowerCase() || '';
+                const enName = card.dataset.enName?.toLowerCase() || '';
+                const category = card.dataset.category?.toLowerCase() || '';
+                const categoryId = card.dataset.categoryId || '';
+
+                const matchesSearch = name.includes(searchTerm) || enName.includes(searchTerm) || category.includes(searchTerm);
+                const matchesCategory = !categoryFilter || categoryId === categoryFilter;
+
+                if (matchesSearch && matchesCategory) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update count
+            document.getElementById('restaurantCount').textContent = visibleCount;
+        }
+
+        // Sort restaurants
+        function sortRestaurants(sortBy, order) {
+            const tableBody = document.querySelector('#restaurantsTable tbody');
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                let aValue, bValue;
+
+                switch (sortBy) {
+                    case 'name':
+                        aValue = a.dataset.name || '';
+                        bValue = b.dataset.name || '';
+                        break;
+                    case 'category':
+                        aValue = a.dataset.category || '';
+                        bValue = b.dataset.category || '';
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (order === 'asc') {
+                    return aValue.localeCompare(bValue, 'ar');
+                } else {
+                    return bValue.localeCompare(aValue, 'ar');
+                }
+            });
+
+            // Re-append sorted rows
+            rows.forEach(row => tableBody.appendChild(row));
+
+            // Sort cards too
+            const cardContainer = document.getElementById('cardViewContainer');
+            const cards = Array.from(cardContainer.querySelectorAll('.restaurant-card'));
+
+            cards.sort((a, b) => {
+                let aValue, bValue;
+
+                switch (sortBy) {
+                    case 'name':
+                        aValue = a.dataset.name || '';
+                        bValue = b.dataset.name || '';
+                        break;
+                    case 'category':
+                        aValue = a.dataset.category || '';
+                        bValue = b.dataset.category || '';
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (order === 'asc') {
+                    return aValue.localeCompare(bValue, 'ar');
+                } else {
+                    return bValue.localeCompare(aValue, 'ar');
+                }
+            });
+
+            // Re-append sorted cards
+            cards.forEach(card => cardContainer.appendChild(card));
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+}
