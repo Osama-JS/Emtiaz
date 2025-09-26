@@ -40,21 +40,7 @@ public class HomeController : Controller
                 ActiveOffers = await _context.Offers.Where(o => o.State == "active").CountAsync(),
                 ExpiredOffers = await _context.Offers.Where(o => o.EndDate < DateTime.Now).CountAsync(),
 
-                // إحصائيات إضافية
-                RestaurantsWithProducts = await _context.Restaurants
-                    .Where(r => !r.Deleted && r.Products.Any())
-                    .CountAsync(),
-                CategoriesWithRestaurants = await _context.Catgories
-                    .Where(c => c.Restaurants.Any(r => !r.Deleted))
-                    .CountAsync(),
-
-                // إحصائيات الأسبوع الماضي
-                NewProductsThisWeek = await _context.Products
-                    .Where(p => p.CreateAt >= DateTime.Now.AddDays(-7))
-                    .CountAsync(),
-                NewOffersThisWeek = await _context.Offers
-                    .Where(o => o.StartDate >= DateTime.Now.AddDays(-7))
-                    .CountAsync()
+             
             };
 
             ViewBag.Stats = stats;
