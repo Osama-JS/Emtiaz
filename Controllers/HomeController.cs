@@ -39,7 +39,8 @@ public class HomeController : Controller
                 TotalOffers = await _context.Offers.CountAsync(),
                 ActiveOffers = await _context.Offers.Where(o => o.State == "active").CountAsync(),
                 ExpiredOffers = await _context.Offers.Where(o => o.EndDate < DateTime.Now).CountAsync(),
-
+                RestaurantsWithProducts = await _context.Restaurants.Where(r => r.Products.Any()).CountAsync(),
+                CategoriesWithRestaurants = await _context.Catgories.Where(c => c.Restaurants.Any()).CountAsync(),
              
             };
 
